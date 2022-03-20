@@ -1,0 +1,23 @@
+{
+  "name": "gqlapi",
+  "version": "0.0.1",
+  "description": "",
+  "type": "module",
+  "main": "server/server.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1",
+    "prestart": "if  ls -1qA $PWD/server/data | grep -q .; then pg_ctl -D $PWD/server/data start; else pg_ctl -D $PWD/server/data initdb; pg_ctl -D $PWD/server/data start; createdb; fi",
+    "start": "trap \"echo Shutting down database \" SIGINT; $PWD/node_modules/.bin/nodemon $PWD/server/server.js; exit 0;",
+    "poststart": "pg_ctl -D $PWD/server/data stop -m smart"
+  },
+  "author": "",
+  "license": "MIT",
+  "devDependencies": {
+    "nodemon": "^2.0.15"
+  },
+  "dependencies": {
+    "express": "^4.17.3",
+    "graphql": "^16.3.0",
+    "pg": "^8.7.3"
+  }
+}
