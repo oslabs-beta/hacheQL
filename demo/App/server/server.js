@@ -1,12 +1,24 @@
 import express from 'express';
 import path, { dirname } from 'path';
 import { fileURLToPath } from 'url';
+import process from 'process';
+import db from './models/randomModel';
+import {
+  GraphQLSchema,
+  GraphQLObjectType,
+  GraphQLString,
+  GraphQLList,
+  GraphQLInt,
+  GraphQLNonNull,
+}
+  from 'graphql';
 
 const PORT = 3000;
-const app = express();
 
 // ESM model for __dirname
 const folderPath = dirname(fileURLToPath(import.meta.url));
+
+const app = express();
 
 app.use(express.json());
 
@@ -28,3 +40,8 @@ app.use((err, req, res, next) => {
 });
 
 app.listen(PORT, () => console.log(`Listening on port ${PORT}`));
+
+process.on('SIGINT', () => {
+  console.log('\nGracefully shutting down API server');
+  process.kill(process.pid, 'SIGTERM');
+});
