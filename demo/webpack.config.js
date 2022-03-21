@@ -44,7 +44,7 @@ const config = {
     port: 8888,
     compress: true,
     hot: true,
-    proxy: { '/': 'http://localhost:3000' },
+    proxy: { '/graphql': 'http://localhost:3000' },
   },
 };
 

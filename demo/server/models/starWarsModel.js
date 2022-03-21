@@ -7,12 +7,6 @@ const pool = new Pool({
   connectionString: PG_URI,
 });
 
-pool.query(`CREATE TABLE IF NOT EXISTS characters (
-  _id SERIAL NOT NULL,
-  name VARCHAR NOT NULL,
-  home_planet_id INT NOT NULL
-  );`);
-
 const randomModel = {
   query: (text, params, callback) => {
     console.log('executed query', text);

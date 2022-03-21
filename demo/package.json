@@ -7,13 +7,13 @@
   "scripts": {
     "test": "echo \"Error: no test specified\" && exit 1",
     "build": "NODE_ENV=production webpack",
-    "initDb": "if  ls -1qA $PWD/server/data | grep -q .; then pg_ctl -D $PWD/server/data start; else pg_ctl -D $PWD/server/data initdb; pg_ctl -D $PWD/server/data start; createdb; fi",
+    "initDb": "if  ls -1qA $PWD/server/data | grep -q .; then pg_ctl -D $PWD/server/data start; else pg_ctl -D $PWD/server/data initdb && pg_ctl -D $PWD/server/data start && createdb && psql -f $PWD/server/mydb.sql; fi",
     "endDb": "pg_ctl -D $PWD/server/data stop -m smart",
     "predev": "npm run initDb",
     "dev": "trap \"echo Shutting down database \" SIGINT; concurrently \"NODE_ENV=development webpack serve --open\" \"NODE_ENV=development nodemon --experimental-specifier-resolution=node server/server.js\"",
     "postdev": "npm run endDb",
     "prestart": "npm run initDb",
-    "start": "node server/server.js",
+    "start": "trap \"echo Shutting down database \" INT; node --experimental-specifier-resolution=node server/server.js; exit 0",
     "poststart": "npm run endDb"
   },
   "author": "",
@@ -21,6 +21,7 @@
   "dependencies": {
     "dotenv": "^16.0.0",
     "express": "^4.17.3",
+    "express-graphql": "^0.12.0",
     "graphql": "^16.3.0",
     "pg": "^8.7.3",
     "react": "^17.0.2",

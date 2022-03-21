@@ -2,7 +2,7 @@ import express from 'express';
 import path, { dirname } from 'path';
 import { fileURLToPath } from 'url';
 import process from 'process';
-import db from './models/randomModel';
+import db from './models/starWarsModel';
 import {
   GraphQLSchema,
   GraphQLObjectType,
@@ -12,6 +12,9 @@ import {
   GraphQLNonNull,
 }
   from 'graphql';
+
+import { graphqlHTTP } from 'express-graphql';
+import types from './graphql/types';
 
 const PORT = 3000;
 
@@ -24,6 +27,12 @@ app.use(express.json());
 
 // serve static files
 app.use(express.static(path.resolve(folderPath, '../build')));
+
+// graphiql
+app.use('/graphql', graphqlHTTP({
+  schema: types.schema,
+  graphiql: true,
+}));
 
 // catch all for pages not found
 app.use((req, res) => res.sendStatus(404));
