@@ -1,0 +1,43 @@
+{
+  "name": "app",
+  "version": "0.0.1",
+  "type": "module",
+  "description": "A minimal client/server to interact with a GraphQL API",
+  "main": "server/server.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1",
+    "build": "NODE_ENV=production webpack",
+    "initDb": "if  ls -1qA $PWD/server/data | grep -q .; then pg_ctl -D $PWD/server/data start; else pg_ctl -D $PWD/server/data initdb && pg_ctl -D $PWD/server/data start && createdb && psql -f $PWD/server/mydb.sql; fi",
+    "endDb": "pg_ctl -D $PWD/server/data stop -m smart",
+    "predev": "npm run initDb",
+    "dev": "trap \"echo Shutting down database \" SIGINT; concurrently \"NODE_ENV=development webpack serve --open\" \"NODE_ENV=development nodemon --experimental-specifier-resolution=node server/server.js\"",
+    "postdev": "npm run endDb",
+    "prestart": "npm run initDb",
+    "start": "trap \"echo Shutting down database \" INT; node --experimental-specifier-resolution=node server/server.js; exit 0",
+    "poststart": "npm run endDb"
+  },
+  "author": "",
+  "license": "MIT",
+  "dependencies": {
+    "dotenv": "^16.0.0",
+    "express": "^4.17.3",
+    "express-graphql": "^0.12.0",
+    "graphql": "^16.3.0",
+    "pg": "^8.7.3",
+    "react": "^17.0.2",
+    "react-dom": "^17.0.2"
+  },
+  "devDependencies": {
+    "@babel/core": "^7.17.8",
+    "@babel/preset-env": "^7.16.11",
+    "@babel/preset-react": "^7.16.7",
+    "babel-loader": "^8.2.3",
+    "concurrently": "^7.0.0",
+    "css-loader": "^6.7.1",
+    "html-webpack-plugin": "^5.5.0",
+    "nodemon": "^2.0.15",
+    "webpack": "^5.70.0",
+    "webpack-cli": "^4.9.2",
+    "webpack-dev-server": "^4.7.4"
+  }
+}
