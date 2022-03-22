@@ -21,7 +21,7 @@ SET default_tablespace = '';
 SET default_table_access_method = heap;
 
 --
--- Name: characters; Type: TABLE; Schema: public; Owner: josephtorsella
+-- Name: characters; Type: TABLE; Schema: public; Owner: <current user>
 --
 
 CREATE TABLE public.characters (
@@ -30,11 +30,8 @@ CREATE TABLE public.characters (
     home_planet_id integer NOT NULL
 );
 
-
-ALTER TABLE public.characters OWNER TO josephtorsella;
-
 --
--- Name: characters__id_seq; Type: SEQUENCE; Schema: public; Owner: josephtorsella
+-- Name: characters__id_seq; Type: SEQUENCE; Schema: public; Owner: <current user>
 --
 
 CREATE SEQUENCE public.characters__id_seq
@@ -45,18 +42,15 @@ CREATE SEQUENCE public.characters__id_seq
     NO MAXVALUE
     CACHE 1;
 
-
-ALTER TABLE public.characters__id_seq OWNER TO josephtorsella;
-
 --
--- Name: characters__id_seq; Type: SEQUENCE OWNED BY; Schema: public; Owner: josephtorsella
+-- Name: characters__id_seq; Type: SEQUENCE OWNED BY; Schema: public; Owner: <current user>
 --
 
 ALTER SEQUENCE public.characters__id_seq OWNED BY public.characters._id;
 
 
 --
--- Name: planets; Type: TABLE; Schema: public; Owner: josephtorsella
+-- Name: planets; Type: TABLE; Schema: public; Owner: <current user>
 --
 
 CREATE TABLE public.planets (
@@ -64,18 +58,15 @@ CREATE TABLE public.planets (
     name character varying NOT NULL
 );
 
-
-ALTER TABLE public.planets OWNER TO josephtorsella;
-
 --
--- Name: characters _id; Type: DEFAULT; Schema: public; Owner: josephtorsella
+-- Name: characters _id; Type: DEFAULT; Schema: public; Owner: <current user>
 --
 
 ALTER TABLE ONLY public.characters ALTER COLUMN _id SET DEFAULT nextval('public.characters__id_seq'::regclass);
 
 
 --
--- Data for Name: characters; Type: TABLE DATA; Schema: public; Owner: josephtorsella
+-- Data for Name: characters; Type: TABLE DATA; Schema: public; Owner: <current user>
 --
 
 COPY public.characters (_id, name, home_planet_id) FROM stdin;
@@ -88,7 +79,7 @@ COPY public.characters (_id, name, home_planet_id) FROM stdin;
 
 
 --
--- Data for Name: planets; Type: TABLE DATA; Schema: public; Owner: josephtorsella
+-- Data for Name: planets; Type: TABLE DATA; Schema: public; Owner: <current user>
 --
 
 COPY public.planets (_id, name) FROM stdin;
@@ -100,14 +91,14 @@ COPY public.planets (_id, name) FROM stdin;
 
 
 --
--- Name: characters__id_seq; Type: SEQUENCE SET; Schema: public; Owner: josephtorsella
+-- Name: characters__id_seq; Type: SEQUENCE SET; Schema: public; Owner: <current user>
 --
 
 SELECT pg_catalog.setval('public.characters__id_seq', 6, true);
 
 
 --
--- Name: characters characters_pkey; Type: CONSTRAINT; Schema: public; Owner: josephtorsella
+-- Name: characters characters_pkey; Type: CONSTRAINT; Schema: public; Owner: <current user>
 --
 
 ALTER TABLE ONLY public.characters
@@ -115,7 +106,7 @@ ALTER TABLE ONLY public.characters
 
 
 --
--- Name: planets planets_pkey; Type: CONSTRAINT; Schema: public; Owner: josephtorsella
+-- Name: planets planets_pkey; Type: CONSTRAINT; Schema: public; Owner: <current user>
 --
 
 ALTER TABLE ONLY public.planets
@@ -123,7 +114,7 @@ ALTER TABLE ONLY public.planets
 
 
 --
--- Name: characters constraint_fk; Type: FK CONSTRAINT; Schema: public; Owner: josephtorsella
+-- Name: characters constraint_fk; Type: FK CONSTRAINT; Schema: public; Owner: <current user>
 --
 
 ALTER TABLE ONLY public.characters
