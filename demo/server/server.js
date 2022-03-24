@@ -15,7 +15,7 @@ import {
 
 import { graphqlHTTP } from 'express-graphql';
 import types from './graphql/types';
-
+import {v4 as uuid} from 'uuid'
 const PORT = 3000;
 
 // ESM model for __dirname
@@ -28,8 +28,23 @@ app.use(express.json());
 // serve static files
 app.use(express.static(path.resolve(folderPath, '../build')));
 
-// graphiql
-app.use('/graphql', graphqlHTTP({
+
+//test middleware
+const persistedQuery = (req, res, next) => {
+  console.log("this is req" + req.url)
+  //
+
+
+  next();
+}
+
+//simple cache:
+
+
+app.get('/graphql', )
+
+// graphiql req
+app.post('/graphql', persistedQuery, graphqlHTTP({
   schema: types.schema,
   graphiql: true,
 }));
