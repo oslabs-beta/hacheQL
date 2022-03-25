@@ -1,7 +1,7 @@
 import React from 'react';
+import { hacheQL } from '../../library/hacheql';
 
 function App() {
-
   // const query = `{
   //   characters {
   //     _id
@@ -13,9 +13,9 @@ function App() {
   //   }
   // }`
 
-  
   const getAll = () => {
-    fetch(`/graphql`, {
+    console.log('click');
+    hacheQL('/graphql', {
       method: 'POST',
       headers: {
         'Content-Type': 'application/json',
@@ -33,11 +33,11 @@ function App() {
         }`
       })
     })
-    .then((res) => res.json())
-    .then((data) => console.log(data.data))
-    .catch((err) => console.log('error in post add application: ', err));
-  }
-
+      .then((res) => res.json())
+      // .then((data) => console.log(data.data))
+      .then((data) => console.log(data))
+      .catch((err) => console.log('error in post add application: ', err));
+  };
 
   return (
     <div>

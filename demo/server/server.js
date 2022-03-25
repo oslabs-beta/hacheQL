@@ -15,7 +15,9 @@ import {
 
 import { graphqlHTTP } from 'express-graphql';
 import types from './graphql/types';
-import {v4 as uuid} from 'uuid'
+// import { v4 as uuid } from 'uuid';
+import { checkHash } from '../../library/hacheql';
+
 const PORT = 3000;
 
 // ESM model for __dirname
@@ -28,26 +30,24 @@ app.use(express.json());
 // serve static files
 app.use(express.static(path.resolve(folderPath, '../build')));
 
+// test middleware
+// const persistedQuery = (req, res, next) => {
+//   console.log("this is req" + req.url)
 
-//test middleware
-const persistedQuery = (req, res, next) => {
-  console.log("this is req" + req.url)
-  //
+//   next();
+// }
 
-
-  next();
-}
-
-//simple cache:
-
-
-app.get('/graphql', )
+// simple cache:
+app.get('/graphql', checkHash, (req, res) => res.json('wazzup?'));
 
 // graphiql req
-app.post('/graphql', persistedQuery, graphqlHTTP({
-  schema: types.schema,
-  graphiql: true,
-}));
+app.post('/graphql',
+  (req, res, next) => { console.log('request received'); return next(); },
+  graphqlHTTP({
+    schema: types.schema,
+    graphiql: true,
+  })
+);
 
 // catch all for pages not found
 app.use((req, res) => res.sendStatus(404));
