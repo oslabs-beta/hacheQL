@@ -38,11 +38,17 @@ app.use(express.static(path.resolve(folderPath, '../build')));
 // }
 
 // simple cache:
-app.get('/graphql', checkHash, (req, res) => res.json('wazzup?'));
+// app.get('/graphql',
+//   checkHash,
+//   graphqlHTTP({
+//     schema: types.schema,
+//   })
+// );
 
 // graphiql req
-app.post('/graphql',
+app.use('/graphql',
   (req, res, next) => { console.log('request received'); return next(); },
+  checkHash,
   graphqlHTTP({
     schema: types.schema,
     graphiql: true,
