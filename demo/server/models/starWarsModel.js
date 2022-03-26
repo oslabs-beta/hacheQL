@@ -7,11 +7,11 @@ const pool = new Pool({
   connectionString: PG_URI,
 });
 
-const randomModel = {
+const starWarsModel = {
   query: (text, params, callback) => {
     console.log('executed query', text);
     return pool.query(text, params, callback);
   },
 };
 
-export default randomModel;
+export default starWarsModel;
