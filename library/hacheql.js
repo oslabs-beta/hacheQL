@@ -31,13 +31,14 @@ function hacheQL(endpoint, options) {
       })
       .catch((err) => {
         console.log(err);
-        if (err.message === HASH) {
-          fetch(endpoint, options)
-            .then((data) => resolve(data))
-            .catch((altErr) => reject(altErr));
-        } else {
-          reject(err);
-        }
+        // if (err.message === HASH) {
+        // fetch(endpoint, options)
+        // .then((data) => resolve(data))
+        // .catch((altErr) => reject(altErr));
+        // }
+        // else {
+        reject(err);
+        // }
       });
   });
 }
