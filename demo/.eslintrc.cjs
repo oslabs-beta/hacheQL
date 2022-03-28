@@ -22,5 +22,7 @@ module.exports = {
     'jest',
   ],
   rules: {
+    'max-len': 'off',
+    'newline-per-chained-call': 'off',
   },
 };

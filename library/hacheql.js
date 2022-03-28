@@ -1,3 +1,5 @@
+import sha1 from 'sha1';
+
 /*
 * @module getWrapper
 * @param {string} query - the string representing the query the client would like to make to the GraphQL service.
@@ -13,7 +15,7 @@ function hacheQL(endpoint, options) {
   // TODO: are these really the only differences between GET and POST?
   const newOpts = { ...options, method: 'GET' };
   // const HASH = newOpts.body;
-  const HASH = 'myFirstHash';
+  const HASH = sha1(options.body);
   delete newOpts.body;
   return new Promise((resolve, reject) => {
     fetch(`${endpoint}/?hash=${HASH}`, newOpts)
@@ -22,7 +24,7 @@ function hacheQL(endpoint, options) {
         // It indicates that the request's hash was not found in the server's cache.
         if (data.status === 800) {
           fetch(`${endpoint}/?hash=${HASH}`, options)
-            .then((data) => resolve(data))
+            .then((data) => { console.log(data); resolve(data); })
             .catch((altErr) => reject(altErr));
         } else {
           resolve(data);
@@ -55,7 +57,6 @@ function checkHash(req, res, next) {
     if (Object.hasOwn(fakeCache, hash)) {
       // Put query object at req.body.query
       req.body = fakeCache[hash];
-    } else {
       // if the hash isn't there, return next(new Error(req.query.hash))
       // What status code should we send?
       const cacheError = new Error();

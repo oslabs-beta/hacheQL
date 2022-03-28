@@ -19,6 +19,7 @@
   "author": "",
   "license": "MIT",
   "dependencies": {
+    "@jest/globals": "^27.5.1",
     "dotenv": "^16.0.0",
     "express": "^4.17.3",
     "express-graphql": "^0.12.0",
@@ -26,6 +27,7 @@
     "pg": "^8.7.3",
     "react": "^17.0.2",
     "react-dom": "^17.0.2",
+    "sha1": "^1.1.1",
     "uuid": "^8.3.2"
   },
   "devDependencies": {
@@ -45,6 +47,7 @@
     "html-webpack-plugin": "^5.5.0",
     "jest": "^27.5.1",
     "nodemon": "^2.0.15",
+    "supertest": "^6.2.2",
     "webpack": "^5.70.0",
     "webpack-cli": "^4.9.2",
     "webpack-dev-server": "^4.7.4"

@@ -1,41 +1,35 @@
-import http from 'http';
+/* eslint-disable jest/expect-expect */
+/* eslint-disable arrow-body-style */
 import request from 'supertest';
 import assert from 'assert';
-// import app from '../server/server';
+import testServer from './testServer';
+import { hacheQL } from './hacheQL.test';
+// import assert from 'assert';
 
-// All this stuff creates a mini-server that I can use to test functions individually.
-import express from 'express';
+beforeAll(() => testServer.startTestServer());
 
-const app = express();
-app.get((req, res) => res.status(404).send('Not found'));
+afterAll(() => testServer.stopTestServer());
 
-let server;
-beforeAll(() => new Promise((resolve, reject) => {
-  server = http.createServer(app);
-  server.listen(3000, (error) => {
-    if (error) {
-      reject(error);
-    }
-    console.log('Listening on port 3000...');
-    resolve();
+describe('Should respond 200 to all requests', () => {
+  test('GET request', () => {
+    return request(testServer.app)
+      .get('/')
+      .expect(200)
+      .expect({ method: 'GET' });
   });
-}));
 
-afterAll(() => new Promise((resolve, reject) => {
-  server.close((error) => {
-    if (error) {
-      reject(error);
-    }
-    console.log('Server on port 3000 has been stopped.');
-    resolve();
+  test('POST request', () => {
+    return request(testServer.app)
+      .post('/')
+      .expect(200)
+      .expect({ method: 'POST' });
   });
-}));
+});
 
-describe('Test routes', () => {
-  // eslint-disable-next-line arrow-body-style
-  it('should respond to unkown routes with 404', () => {
-    return request(server)
-      .get('/bagelbites')
-      .expect(404);
+describe('hacheQLFetch', () => {
+  it('Should send a GET request to the passed-in endpoint', async () => {
+    let response = await hacheQL(`http://localhost:${testServer.PORT}/graphql`);
+    response = await response.json();
+    expect(response.method).toBe('GET');
   });
 });
