@@ -2,19 +2,28 @@ import React from 'react';
 import { hacheQL } from '../../library/hacheql';
 
 function App() {
-  // const query = `{
-  //   characters {
-  //     _id
-  //     name
-  //     home_planet_id
-  //     homePlanet {
-  //       name
-  //     }
-  //   }
-  // }`
+  // for performance metric
+  const addOne = () => {
+    console.log('addOne clicked')
+    fetch('/graphql', {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+      },
+      body: JSON.stringify({
+        query: ` mutation {
+          addCharacter (name: "Jason", home_planet_id: 1)
+        }`
+      })
+    })
+  }
 
+  let t0, t1;
   const getAll = () => {
     console.log('click');
+    // initiate timer
+    t0 = performance.now()
+    console.log('t0', t0);
     hacheQL('/graphql', {
       method: 'POST',
       headers: {
@@ -35,13 +44,19 @@ function App() {
     })
       .then((res) => res.json())
       // .then((data) => console.log(data.data))
-      .then((data) => console.log(data))
+      .then((data) => {
+        console.log(data)
+        // timer ends after fetch
+        t1 = performance.now();
+        console.log('runtime', t1-t0)
+      })
       .catch((err) => console.log('error in post add application: ', err));
   };
 
   return (
     <div>
     <button onClick={getAll}>Button</button>
+    <button onClick={addOne}>addCharacter</button>
     </div>
   );
 }

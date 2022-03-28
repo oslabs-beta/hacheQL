@@ -30,20 +30,6 @@ app.use(express.json());
 // serve static files
 app.use(express.static(path.resolve(folderPath, '../build')));
 
-// test middleware
-// const persistedQuery = (req, res, next) => {
-//   console.log("this is req" + req.url)
-
-//   next();
-// }
-
-// simple cache:
-// app.get('/graphql',
-//   checkHash,
-//   graphqlHTTP({
-//     schema: types.schema,
-//   })
-// );
 
 // graphiql req
 app.use('/graphql',
