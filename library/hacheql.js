@@ -5,15 +5,11 @@
 * @returns {promise} - promise that resolves to the value returned either from the cache or the server, or terminates in an error, unless the error is that the server does not recognize our query param,
 * in which case the promise does not resolve until a second fetch is sent and returned.
 */
-
+import sha1 from 'sha1'
 // CLIENT SIDE
 function hacheQL(endpoint, options) {
-  // The value of the body property should already be JSON string.
-  // (I.e., the developer using the package should have stringified it themselves before passing the options object to our function.)
-  // TODO: are these really the only differences between GET and POST?
   const newOpts = { ...options, method: 'GET' };
-  // const HASH = newOpts.body;
-  const HASH = 'myFirstHash';
+  const HASH = sha1(newOpts.body);
   delete newOpts.body;
   return new Promise((resolve, reject) => {
     fetch(`${endpoint}/?hash=${HASH}`, newOpts)
@@ -64,11 +60,32 @@ function checkHash(req, res, next) {
     }
     // We don't need to set an etag here
   } else if (req.method === 'POST') {
-    console.log(req.body);
+    const uncacheable = ['mutation', 'subscription'];
+    const query = req.body.query;
+    const operationType = query.split("{")[0].trim();
+    console.log('operation type', operationType)
+    if (uncacheable.includes(operationType)) {
+      console.log('nah man')
+      return next();
+    } else {
     fakeCache[req.query.hash] = req.body;
     return next();
+    }
     // save key-value of Hash into Redis
   }
   return next();
 }
-export { hacheQL, checkHash };
+
+
+function httpCache(req, res, next) {
+  if (req.method === 'GET') {
+    res.set({
+      'Cache-Control':  'no-cache'
+      // If we set E-tag here, it will never update
+      // Etag: req.query.hash
+    });
+  } 
+  return next();
+}
+
+export { hacheQL, checkHash, httpCache };
