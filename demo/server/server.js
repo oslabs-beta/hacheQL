@@ -3,7 +3,7 @@ import path, { dirname } from 'path';
 import { fileURLToPath } from 'url';
 import process from 'process';
 import { graphqlHTTP } from 'express-graphql';
-import helpers from './graphql/types';
+import { schema } from './graphql/types';
 // import { v4 as uuid } from 'uuid';
 import { checkHash, httpCache } from '../../library/hacheql';
 
@@ -19,13 +19,14 @@ app.use(express.json());
 // serve static files
 app.use(express.static(path.resolve(folderPath, '../build')));
 
-
 // graphiql req
 app.use(
   '/graphql',
   (req, res, next) => { console.log('request received'); return next(); },
+  checkHash,
+  httpCache,
   graphqlHTTP({
-    schema: helpers.schema,
+    schema,
     graphiql: true,
   }),
 );
