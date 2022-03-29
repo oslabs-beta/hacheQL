@@ -5,7 +5,7 @@ import process from 'process';
 import { graphqlHTTP } from 'express-graphql';
 import schema from './graphql/types';
 // import { v4 as uuid } from 'uuid';
-import { checkHash, httpCache } from '../../library/hacheql';
+import { checkHash, httpCache } from '../../library/hacheql-server';
 
 const PORT = 3000;
 
