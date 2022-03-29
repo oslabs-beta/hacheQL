@@ -107,7 +107,7 @@ const mockServer_HashNotFound = jest.fn((endpoint, options) => {
   if (options.method === 'POST') {
     return Promise.resolve(serverResponse200);
   }
-  return 'Neither GET nor POST request.';
+  return Promise.resolve('Neither a GET nor POST request. Weird...');
 });
 
 // Imitates server responses when the requested hash is present in the server's cache.
@@ -119,6 +119,15 @@ const mockServer_NotModified = jest.fn(() => Promise.resolve(serverResponse304))
 
 // Simulates an error during the fetch API call.
 const mockErrorGET = jest.fn((endpoint, options) => Promise.reject(new Error('Ouch! GET me to a doctor!')));
+const mockErrorPOST = jest.fn((endpoint, options) => {
+  if (options.method === 'GET') {
+    return Promise.resolve(serverResponse800);
+  }
+  if (options.method === 'POST') {
+    return Promise.reject(new Error('Yikes! This one\'s going to need a POSTmortem!'));
+  }
+  return Promise.resolve('Neither a GET nor POST request. Weird...');
+});
 
 // TESTS =======================================================
 describe('hacheQL() - client-side wrapper for fetch()', () => {
@@ -191,6 +200,17 @@ describe('hacheQL() - client-side wrapper for fetch()', () => {
       const response = await hacheQL(endpointURL, requestOptions);
       expect(response).toEqual(serverResponse304);
     });
+  });
+
+  describe('Should handle errors gracefully', () => {
+    async function hacheQLAttempt() {
+      try {
+        const response = await hacheQL(endpointURL, requestOptions);
+        return response;
+      } catch (error) {
+        return error;
+      }
+    }
 
     test('Should catch errors during a GET request', async () => {
       expect.assertions(1);
@@ -202,17 +222,22 @@ describe('hacheQL() - client-side wrapper for fetch()', () => {
 
       // But ESLint recommends doing it this way instead:
       // https://github.com/jest-community/eslint-plugin-jest/blob/v26.1.3/docs/rules/no-conditional-expect.md
-      async function hacheQLAttempt() {
-        try {
-          const response = await hacheQL(endpointURL, requestOptions);
-          return response;
-        } catch (error) {
-          return error;
-        }
-      }
+      // (See both the rest of this 'test' block and the top of this 'describe' block.)
+
+      // Also, note that 'errors thrown inside asynchronous functions will act like uncaught errors.'
+      // That tripped me up for a while.
+      // https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Promise/catch#gotchas_when_throwing_errors
 
       const result = await (hacheQLAttempt());
       expect(result).toEqual(new Error('Ouch! GET me to a doctor!'));
+    });
+
+    test('Should catch errors during a followup POST request', async () => {
+      expect.assertions(1);
+      global.fetch = mockErrorPOST;
+
+      const result = await (hacheQLAttempt());
+      expect(result).toEqual(new Error('Yikes! This one\'s going to need a POSTmortem!'));
     });
   });
 });
