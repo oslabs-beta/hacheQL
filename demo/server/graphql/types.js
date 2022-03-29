@@ -171,6 +171,4 @@ const schema = new GraphQLSchema({
 
 // Starship specs?
 
-export default {
-  schema,
-};
+export default schema;
