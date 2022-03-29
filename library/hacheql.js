@@ -1,5 +1,3 @@
-import sha1 from 'sha1';
-
 /*
 * @module getWrapper
 * @param {string} query - the string representing the query the client would like to make to the GraphQL service.
@@ -7,7 +5,7 @@ import sha1 from 'sha1';
 * @returns {promise} - promise that resolves to the value returned either from the cache or the server, or terminates in an error, unless the error is that the server does not recognize our query param,
 * in which case the promise does not resolve until a second fetch is sent and returned.
 */
-import sha1 from 'sha1'
+import sha1 from 'sha1';
 // CLIENT SIDE
 function hacheQL(endpoint, options) {
   const newOpts = { ...options, method: 'GET' };
@@ -62,30 +60,29 @@ function checkHash(req, res, next) {
     // We don't need to set an etag here
   } else if (req.method === 'POST') {
     const uncacheable = ['mutation', 'subscription'];
-    const query = req.body.query;
-    const operationType = query.split("{")[0].trim();
-    console.log('operation type', operationType)
+    const { query } = req.body;
+    const operationType = query.split('{')[0].trim();
+    console.log('operation type', operationType);
     if (uncacheable.includes(operationType)) {
-      console.log('nah man')
+      console.log('nah man');
       return next();
-    } else {
+    }
     fakeCache[req.query.hash] = req.body;
     return next();
-    }
+
     // save key-value of Hash into Redis
   }
   return next();
 }
 
-
 function httpCache(req, res, next) {
   if (req.method === 'GET') {
     res.set({
-      'Cache-Control':  'no-cache'
+      'Cache-Control': 'no-cache',
       // If we set E-tag here, it will never update
       // Etag: req.query.hash
     });
-  } 
+  }
   return next();
 }
 
