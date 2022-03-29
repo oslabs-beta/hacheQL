@@ -23,6 +23,7 @@
     "eslint-plugin-import": "^2.25.4"
   },
   "dependencies": {
-    "redis": "^4.0.4"
+    "redis": "^4.0.4",
+    "sha1": "^1.1.1"
   }
 }

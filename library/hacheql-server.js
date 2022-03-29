@@ -24,7 +24,10 @@ async function checkHash(req, res, next) {
     // We don't need to set an etag here
   } else if (req.method === 'POST') {
     // should only apply for non mutations
-    if (!req.body.mutation) {
+    const uncacheable = ['mutation', 'subscription'];
+    const query = req.body.query;
+    const operationType = query.split('{')[0].trim();
+    if (!uncacheable.includes(operationType)) {
     // save key-value of Hash into Redis
       await redisClient.set(req.query.hash, JSON.stringify(req.body), (err) => {
         if (err) console.log(err);
@@ -35,4 +38,15 @@ async function checkHash(req, res, next) {
   return next();
 }
 
-export { checkHash };
+function httpCache(req, res, next) {
+  if (req.method === 'GET') {
+    res.set({
+      'Cache-Control': 'no-cache',
+      // If we set E-tag here, it will never update
+      // Etag: req.query.hash
+    });
+  }
+  return next();
+}
+
+export { checkHash, httpCache };
