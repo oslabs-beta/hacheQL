@@ -1,9 +1,9 @@
 /* eslint-disable camelcase */
 import { jest } from '@jest/globals';
 import sha1 from 'sha1';
-import { hacheQL } from '../../library/hacheql';
+import { hacheQL } from '../hacheql';
 
-// GLOBAL VARIABLES/CONSTANTS ==================================
+// GLOBAL CONSTANTS ==================================
 const endpointURL = 'chicken-nuggest'; // yes, 'nuggest'
 const requestOptions = {
   method: 'POST',
@@ -118,7 +118,7 @@ const mockServer_HashFound = jest.fn(() => Promise.resolve(serverResponse200));
 const mockServer_NotModified = jest.fn(() => Promise.resolve(serverResponse304));
 
 // Simulates an error during the fetch API call.
-const mockErrorGET = jest.fn((endpoint, options) => Promise.reject(new Error('Ouch! GET me to a doctor!')));
+const mockErrorGET = jest.fn(() => Promise.reject(new Error('Ouch! GET me to a doctor!')));
 const mockErrorPOST = jest.fn((endpoint, options) => {
   if (options.method === 'GET') {
     return Promise.resolve(serverResponse800);
