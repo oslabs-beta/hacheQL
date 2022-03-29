@@ -56,26 +56,9 @@ const rootQueryType = new GraphQLObjectType({
   }),
 });
 
-const mutationType = new GraphQLObjectType({
-  name: 'Mutation',
-  description: 'Our mutating type',
-  fields: () => ({
-    addCharacter: {
-      type: characterType,
-      args: {
-        name: { type: new GraphQLNonNull(GraphQLString) },
-        home_planet_id: { type: new GraphQLNonNull(GraphQLInt) },
-      },
-      resolve(parents, args) {
-        return db.query('INSERT INTO Characters (name, home_planet_id) VALUES ( $1, $2) RETURNING *', [ args.name, args.home_planet_id])
-      }
-    }
-  })
-})
 
 const schema = new GraphQLSchema({
   query: rootQueryType,
-  mutation: mutationType
 });
 
 export default {

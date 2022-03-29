@@ -2,22 +2,6 @@ import React from 'react';
 import { hacheQL } from '../../library/hacheql';
 
 function App() {
-  // for performance metric
-  const addOne = () => {
-    console.log('addOne clicked')
-    fetch('/graphql', {
-      method: 'POST',
-      headers: {
-        'Content-Type': 'application/json',
-      },
-      body: JSON.stringify({
-        query: ` mutation {
-          addCharacter (name: "Jason", home_planet_id: 1)
-        }`
-      })
-    })
-  }
-
   let t0, t1;
   const getAll = () => {
     console.log('click');
@@ -56,7 +40,6 @@ function App() {
   return (
     <div>
     <button onClick={getAll}>Button</button>
-    <button onClick={addOne}>addCharacter</button>
     </div>
   );
 }
