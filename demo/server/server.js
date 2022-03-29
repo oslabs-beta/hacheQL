@@ -2,6 +2,7 @@ import express from 'express';
 import path, { dirname } from 'path';
 import { fileURLToPath } from 'url';
 import process from 'process';
+import db from './models/starWarsModel';
 import {
   GraphQLSchema,
   GraphQLObjectType,
@@ -13,7 +14,6 @@ import {
   from 'graphql';
 
 import { graphqlHTTP } from 'express-graphql';
-import db from './models/starWarsModel';
 import types from './graphql/types';
 // import { v4 as uuid } from 'uuid';
 import { checkHash, httpCache } from '../../library/hacheql';
@@ -32,14 +32,13 @@ app.use(express.static(path.resolve(folderPath, '../build')));
 
 
 // graphiql req
-app.use(
-  '/graphql',
+app.use('/graphql',
   (req, res, next) => { console.log('request received'); return next(); },
   checkHash, httpCache,
   graphqlHTTP({
     schema: types.schema,
     graphiql: true,
-  }),
+  })
 );
 
 // catch all for pages not found
@@ -52,7 +51,7 @@ app.use((err, req, res, next) => {
     status: 500,
     message: { err: 'An error occurred!' },
   };
-  const errorObj = { ...defaultErr, ...err };
+  const errorObj = Object.assign({}, defaultErr, err);
   return res.status(errorObj.status).json(errorObj.message);
 });
 
@@ -62,5 +61,3 @@ process.on('SIGINT', () => {
   console.log('\nGracefully shutting down API server');
   process.kill(process.pid, 'SIGTERM');
 });
-
-export default app;
