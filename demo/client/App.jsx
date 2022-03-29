@@ -2,19 +2,12 @@ import React from 'react';
 import { hacheQL } from '../../library/hacheql';
 
 function App() {
-  // const query = `{
-  //   characters {
-  //     _id
-  //     name
-  //     home_planet_id
-  //     homePlanet {
-  //       name
-  //     }
-  //   }
-  // }`
-
+  let t0, t1;
   const getAll = () => {
     console.log('click');
+    // initiate timer
+    t0 = performance.now()
+    console.log('t0', t0);
     hacheQL('/graphql', {
       method: 'POST',
       headers: {
@@ -35,7 +28,12 @@ function App() {
     })
       .then((res) => res.json())
       // .then((data) => console.log(data.data))
-      .then((data) => console.log(data))
+      .then((data) => {
+        console.log(data)
+        // timer ends after fetch
+        t1 = performance.now();
+        console.log('runtime', t1-t0)
+      })
       .catch((err) => console.log('error in post add application: ', err));
   };
 

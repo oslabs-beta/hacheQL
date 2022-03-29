@@ -16,7 +16,7 @@ import { graphqlHTTP } from 'express-graphql';
 import db from './models/starWarsModel';
 import types from './graphql/types';
 // import { v4 as uuid } from 'uuid';
-import { checkHash } from '../../library/hacheql';
+import { checkHash, httpCache } from '../../library/hacheql';
 
 const PORT = 3000;
 
@@ -30,26 +30,12 @@ app.use(express.json());
 // serve static files
 app.use(express.static(path.resolve(folderPath, '../build')));
 
-// test middleware
-// const persistedQuery = (req, res, next) => {
-//   console.log("this is req" + req.url)
-
-//   next();
-// }
-
-// simple cache:
-// app.get('/graphql',
-//   checkHash,
-//   graphqlHTTP({
-//     schema: types.schema,
-//   })
-// );
 
 // graphiql req
 app.use(
   '/graphql',
   (req, res, next) => { console.log('request received'); return next(); },
-  checkHash,
+  checkHash, httpCache,
   graphqlHTTP({
     schema: types.schema,
     graphiql: true,
