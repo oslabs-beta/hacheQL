@@ -29,7 +29,7 @@ const requestOptions = {
 };
 const serverResponse200 = {
   status: 200,
-  body: {
+  body: JSON.stringify({
     data: {
       characters: [
         {
@@ -74,7 +74,7 @@ const serverResponse200 = {
         },
       ],
     },
-  },
+  }),
 };
 const serverResponse304 = {
   status: 304,
@@ -104,14 +104,21 @@ const mockServer_HashNotFound = jest.fn((endpoint, options) => {
   if (options.method === 'GET') {
     return Promise.resolve(serverResponse800);
   }
-  return Promise.resolve(JSON.stringify(serverResponse200));
+  if (options.method === 'POST') {
+    return Promise.resolve(serverResponse200);
+  }
+  return 'Neither GET nor POST request.';
 });
 
 // Imitates server responses when the requested hash is present in the server's cache.
 // When receiving a GET request: responds with status code 200 and a body of JSON-formatted data, imitating data from a database.
-const mockServer_HashFound = jest.fn(() => Promise.resolve(JSON.stringify(serverResponse200)));
+const mockServer_HashFound = jest.fn(() => Promise.resolve(serverResponse200));
 
-const mockServer_NotModified = jest.fn(() => Promise.resolve(JSON.stringify(serverResponse304)));
+// Imitates server responses when the requested hash is present in the server's cache and the requested resource has not been modified.
+const mockServer_NotModified = jest.fn(() => Promise.resolve(serverResponse304));
+
+// Simulates an error during the fetch API call.
+const mockErrorGET = jest.fn((endpoint, options) => Promise.reject(new Error('Ouch! GET me to a doctor!')));
 
 // TESTS =======================================================
 describe('hacheQL() - client-side wrapper for fetch()', () => {
@@ -166,26 +173,30 @@ describe('hacheQL() - client-side wrapper for fetch()', () => {
       expect.assertions(2);
       global.fetch = mockServer_HashNotFound;
       const response = await hacheQL(endpointURL, requestOptions);
-      const data = await response.json();
       expect(mockServer_HashNotFound).toBeCalledTimes(2);
-      expect(data).toEqual(serverResponse200);
+      expect(response).toEqual(serverResponse200);
     });
 
     test('Should return data from the server if the response has a status code of 200.', async () => {
       expect.assertions(2);
       global.fetch = mockServer_HashFound;
       const response = await hacheQL(endpointURL, requestOptions);
-      const data = await response.json();
       expect(mockServer_HashFound).toBeCalledTimes(1);
-      expect(data).toEqual(serverResponse200);
+      expect(response).toEqual(serverResponse200);
     });
 
     test('Should return data from the server if the response has a status code of 304.', async () => {
-      expect.assertions();
+      expect.assertions(1);
       global.fetch = mockServer_NotModified;
       const response = await hacheQL(endpointURL, requestOptions);
-      const data = await response.json();
-      expect(data).toEqual(serverResponse304);
+      expect(response).toEqual(serverResponse304);
+    });
+
+    test('Should catch errors during a GET request', async () => {
+      expect.assertions(1);
+      global.fetch = mockErrorGET;
+
+      return hacheQL(endpointURL, requestOptions).catch((error) => expect(error.message).toBe('Ouch! GET me to a doctor!'));
     });
   });
 });
