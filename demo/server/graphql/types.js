@@ -1,4 +1,5 @@
 import {
+  Kind,
   GraphQLSchema,
   GraphQLObjectType,
   GraphQLList,
@@ -11,15 +12,27 @@ import {
 
 import db from '../models/starWarsModel';
 
-const BigInt = new GraphQLScalarType({
+const bigIntType = new GraphQLScalarType({
   name: 'BigInt',
   serialize: (val) => val,
+});
+
+const dateType = new GraphQLScalarType({
+  name: 'Date',
+  parseValue: (val) => (new Date(val)).toISOString(),
+  serialize: (date) => date.toDateString(),
+  parseLiteral: (ast) => {
+    if (ast.kind === Kind.INT) {
+      return (new Date(+ast.value)).toISOString();
+    }
+    return null;
+  },
 });
 
 const personType = new GraphQLObjectType({
   name: 'Person',
   fields: {
-    _id: { type: BigInt },
+    _id: { type: bigIntType },
     name: { type: new GraphQLNonNull(GraphQLString) },
     mass: { type: GraphQLString },
     hair_color: { type: GraphQLString },
@@ -27,34 +40,34 @@ const personType = new GraphQLObjectType({
     eye_color: { type: GraphQLString },
     birth_year: { type: GraphQLString },
     gender: { type: GraphQLString },
-    species_id: { type: BigInt },
-    homeworld_id: { type: BigInt },
+    species_id: { type: bigIntType },
+    homeworld_id: { type: bigIntType },
   },
 });
 
 const filmType = new GraphQLObjectType({
   name: 'Film',
   fields: {
-    _id: { type: BigInt },
+    _id: { type: bigIntType },
     title: { type: new GraphQLNonNull(GraphQLString) },
     episode_id: { type: new GraphQLNonNull(GraphQLInt) },
     opening_crawl: { type: new GraphQLNonNull(GraphQLString) },
     director: { type: new GraphQLNonNull(GraphQLString) },
     producer: { type: new GraphQLNonNull(GraphQLString) },
-    release_date: { type: new GraphQLNonNull(GraphQLString) },
+    release_date: { type: new GraphQLNonNull(dateType) },
   },
 });
 
 const vesselType = new GraphQLObjectType({
   name: 'Vessel',
   fields: {
-    _id: { type: BigInt },
+    _id: { type: bigIntType },
     name: { type: new GraphQLNonNull(GraphQLString) },
     manufacturer: { type: GraphQLString },
     model: { type: GraphQLString },
     vessel_type: { type: new GraphQLNonNull(GraphQLString) },
     vessel_class: { type: new GraphQLNonNull(GraphQLString) },
-    cost_in_credits: { type: BigInt },
+    cost_in_credits: { type: bigIntType },
     length: { type: GraphQLString },
     max_atmosphering_speed: { type: GraphQLString },
     crew: { type: GraphQLInt },
@@ -67,7 +80,7 @@ const vesselType = new GraphQLObjectType({
 const speciesType = new GraphQLObjectType({
   name: 'Species',
   fields: {
-    _id: { type: BigInt },
+    _id: { type: bigIntType },
     name: { type: new GraphQLNonNull(GraphQLString) },
     classification: { type: GraphQLString },
     average_height: { type: GraphQLString },
@@ -76,14 +89,14 @@ const speciesType = new GraphQLObjectType({
     skin_colors: { type: GraphQLString },
     eye_colors: { type: GraphQLString },
     language: { type: GraphQLString },
-    homeworld_id: { type: BigInt },
+    homeworld_id: { type: bigIntType },
   },
 });
 
 const planetType = new GraphQLObjectType({
   name: 'Planet',
   fields: {
-    _id: { type: BigInt },
+    _id: { type: bigIntType },
     name: { type: GraphQLString },
     rotation_period: { type: GraphQLInt },
     orbital_period: { type: GraphQLInt },
@@ -92,7 +105,7 @@ const planetType = new GraphQLObjectType({
     gravity: { type: GraphQLString },
     terrain: { type: GraphQLString },
     surface_water: { type: GraphQLString },
-    population: { type: BigInt },
+    population: { type: bigIntType },
   },
 });
 
@@ -128,13 +141,13 @@ const mutationType = new GraphQLObjectType({
     addFilm: {
       type: filmType,
       args: {
-        _id: { type: new GraphQLNonNull(BigInt) },
+        _id: { type: new GraphQLNonNull(bigIntType) },
         title: { type: new GraphQLNonNull(GraphQLString) },
         episode_id: { type: new GraphQLNonNull(GraphQLInt) },
         opening_crawl: { type: new GraphQLNonNull(GraphQLString) },
         director: { type: new GraphQLNonNull(GraphQLString) },
         producer: { type: new GraphQLNonNull(GraphQLString) },
-        release_date: { type: new GraphQLNonNull(GraphQLString) },
+        release_date: { type: new GraphQLNonNull(dateType) },
       },
       resolve: (_, {
         _id,
@@ -145,12 +158,11 @@ const mutationType = new GraphQLObjectType({
         producer,
         release_date: releaseDate,
       }) => (
-        db.query('INSERT INTO films(_id, title, episode_id, opening_crawl, director, producer, release_date) VALUES($1, $2, $3, $4, $5, $6, now()) ON CONFLICT (_id) DO UPDATE SET title=$2, episode_id=$3, opening_crawl=$4, director=$5, producer=$6, release_date=now() RETURNING *;', [_id, title, episodeId, openingCrawl, director, producer]).then((result) => result.rows[0]).catch((e) => e)
+        db.query('INSERT INTO films(_id, title, episode_id, opening_crawl, director, producer, release_date) VALUES($1, $2, $3, $4, $5, $6, $7) ON CONFLICT (_id) DO UPDATE SET title=$2, episode_id=$3, opening_crawl=$4, director=$5, producer=$6, release_date=$7 RETURNING *;', [_id, title, episodeId, openingCrawl, director, producer, releaseDate]).then((result) => result.rows[0]).catch((e) => e)
       ),
     },
   },
 });
-
 
 const schema = new GraphQLSchema({
   query: queryType,
