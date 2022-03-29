@@ -122,7 +122,7 @@ const queryType = new GraphQLObjectType({
     },
     species: {
       type: new GraphQLList(speciesType),
-      resolve: () => db.query('SELECT * FROM planets;').then((result) => result.rows).catch((e) => e),
+      resolve: () => db.query('SELECT * FROM species;').then((result) => result.rows).catch((e) => e),
     },
     people: {
       type: new GraphQLList(personType),
@@ -130,7 +130,7 @@ const queryType = new GraphQLObjectType({
     },
     vessels: {
       type: new GraphQLList(vesselType),
-      resolve: () => db.query('SELECT * FROM people;').then((result) => result.rows).catch((e) => e),
+      resolve: () => db.query('SELECT * FROM vessels;').then((result) => result.rows).catch((e) => e),
     },
   },
 });
@@ -171,6 +171,4 @@ const schema = new GraphQLSchema({
 
 // Starship specs?
 
-export default {
-  schema,
-};
+export default schema;

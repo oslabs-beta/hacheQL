@@ -7,7 +7,7 @@
   "scripts": {
     "test": "echo \"Error: no test specified\" && exit 1",
     "build": "NODE_ENV=production webpack",
-    "initDb": "if  ls -1qA $PWD/server/data | grep -q .; then pg_ctl -D $PWD/server/data start; else pg_ctl -D $PWD/server/data initdb && pg_ctl -D $PWD/server/data start && createdb && psql -f $PWD/server/mydb.sql; fi",
+    "initDb": "if  ls -1qA $PWD/server/data | grep -q .; then pg_ctl -D $PWD/server/data start; else pg_ctl -D $PWD/server/data initdb && pg_ctl -D $PWD/server/data start && createdb && psql -f $PWD/server/mydb.sql; fi; redis-server &",
     "endDb": "pg_ctl -D $PWD/server/data stop -m smart",
     "predev": "npm run initDb",
     "dev": "trap \"echo Shutting down database \" SIGINT; concurrently \"NODE_ENV=development webpack serve --open\" \"NODE_ENV=development nodemon --watch server --watch ../library --experimental-specifier-resolution=node server/server.js\"",
