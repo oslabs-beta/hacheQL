@@ -16,7 +16,7 @@ import {
 import { graphqlHTTP } from 'express-graphql';
 import types from './graphql/types';
 // import { v4 as uuid } from 'uuid';
-import { checkHash } from '../../library/hacheql';
+import { checkHash } from '../../library/hacheql-server';
 
 const PORT = 3000;
 
@@ -46,7 +46,8 @@ app.use(express.static(path.resolve(folderPath, '../build')));
 // );
 
 // graphiql req
-app.use('/graphql',
+app.use(
+  '/graphql',
   (req, res, next) => { console.log('request received'); return next(); },
   checkHash,
   graphqlHTTP({

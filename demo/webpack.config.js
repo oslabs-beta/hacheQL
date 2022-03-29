@@ -10,6 +10,17 @@ const config = {
   entry: './client/index.jsx',
   resolve: {
     extensions: ['.js', '.jsx'],
+    // fallback: { 
+    //   'events': false,
+    //   'net': false,
+    //   'tls': false,
+    //   'crypto': false,
+    //   'assert': false,
+    //   'util': false,
+    //   'buffer': false,
+    //   'string_decoder': false,
+    //   'url': require.resolve('url')
+    // },
   },
   output: {
     filename: 'bundle.js',
