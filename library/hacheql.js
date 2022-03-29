@@ -18,7 +18,7 @@ function hacheQL(endpoint, options) {
         // It indicates that the request's hash was not found in the server's cache.
         if (data.status === 800) {
           fetch(`${endpoint}/?hash=${HASH}`, options)
-            .then((data) => { console.log(data); resolve(data); })
+            .then((data) => resolve(data))
             .catch((altErr) => reject(altErr));
         } else {
           resolve(data);
