@@ -2,6 +2,20 @@
 import { jest } from '@jest/globals';
 import sha1 from 'sha1';
 import { hacheQL } from '../hacheql';
+import {
+  endpointURL,
+  requestOptions,
+  serverResponse200,
+  serverResponse304,
+} from './mockReqRes.test';
+import {
+  getFetchRequestProfile,
+  mockServer_HashNotFound,
+  mockServer_HashFound,
+  mockServer_NotModified,
+  mockErrorGET,
+  mockErrorPOST,
+} from './mockFunctions.test';
 
 /**
 * Function signature
@@ -14,132 +28,6 @@ import { hacheQL } from '../hacheql';
 * @param {object} options - An object containing settings for the request; for example, the HTTP request method, headers, and request body. Analogous to the fetch API's 'init' parameter. All valid settings for the fetch API's 'init' object are valid for this function's options object.
 * @returns {promise} - A promise that resolves to a response object from the server, or rejects with an error object.
 */
-
-// GLOBAL CONSTANTS ==================================
-const endpointURL = 'chicken-nuggest'; // yes, 'nuggest'
-const requestOptions = {
-  method: 'POST',
-  headers: {
-    'Happy-Meal-Toy': 'Bowser in a Mario Kart car',
-  },
-  body: JSON.stringify(
-    {
-      query: `{
-          characters {
-            _id
-            name
-            win_rate
-            best_time
-            favorite_item
-            arch_nemesis {
-              name
-            }
-          }
-         }`,
-    },
-  ),
-};
-const serverResponse200 = {
-  status: 200,
-  body: JSON.stringify({
-    data: {
-      characters: [
-        {
-          _id: 1,
-          name: 'Mario',
-          win_rate: '54%',
-          best_time: '1:50.713',
-          favorite_item: 'Golden Mushroom',
-          arch_nemesis: {
-            name: 'Bowser',
-          },
-        },
-        {
-          _id: 2,
-          name: 'Princess Peach',
-          win_rate: '78%',
-          best_time: '1:23.402',
-          favorite_item: 'Bob-omb',
-          arch_nemesis: {
-            name: 'Luigi',
-          },
-        },
-        {
-          _id: 3,
-          name: 'Luigi',
-          win_rate: '41%',
-          best_time: '2:09.250',
-          favorite_item: 'Triple Bananas',
-          arch_nemesis: {
-            name: 'Bowser',
-          },
-        },
-        {
-          _id: 4,
-          name: 'Bowser',
-          win_rate: '48%',
-          best_time: '1:56.917',
-          favorite_item: 'Piranha Plant',
-          arch_nemesis: {
-            name: 'Mario',
-          },
-        },
-      ],
-    },
-  }),
-};
-const serverResponse304 = {
-  status: 304,
-};
-const serverResponse800 = {
-  status: 800,
-};
-
-// MOCK FUNCTIONS ==============================================
-// These functions are used in the tests in place of the actual fetch API.
-
-// Returns an object with metadata about the HTTP request being sent.
-const getFetchRequestProfile = jest.fn((endpoint, { method, headers, body }) => {
-  const fetchRequest = {};
-  if (endpoint !== undefined) fetchRequest.endpoint = endpoint;
-  if (method !== undefined) fetchRequest.method = method;
-  if (headers !== undefined) fetchRequest.headers = headers;
-  if (body !== undefined) fetchRequest.body = body;
-
-  return Promise.resolve(fetchRequest);
-});
-
-// Imitates server responses when the requested hash is not present in the server's cache.
-// When receiving a GET request: responds with status code 800.
-// When receiving a POST request: responds with status code 200 and a body of JSON-formatted data, imitating data from a database.
-const mockServer_HashNotFound = jest.fn((endpoint, options) => {
-  if (options.method === 'GET') {
-    return Promise.resolve(serverResponse800);
-  }
-  if (options.method === 'POST') {
-    return Promise.resolve(serverResponse200);
-  }
-  return Promise.resolve('Neither a GET nor POST request. Weird...');
-});
-
-// Imitates server responses when the requested hash is present in the server's cache.
-// When receiving a GET request: responds with status code 200 and a body of JSON-formatted data, imitating data from a database.
-const mockServer_HashFound = jest.fn(() => Promise.resolve(serverResponse200));
-
-// Imitates server responses when the requested hash is present in the server's cache and the requested resource has not been modified.
-const mockServer_NotModified = jest.fn(() => Promise.resolve(serverResponse304));
-
-// Simulates an error during the fetch API call.
-const mockErrorGET = jest.fn(() => Promise.reject(new Error('Ouch! GET me to a doctor!')));
-const mockErrorPOST = jest.fn((endpoint, options) => {
-  if (options.method === 'GET') {
-    return Promise.resolve(serverResponse800);
-  }
-  if (options.method === 'POST') {
-    return Promise.reject(new Error('Yikes! This one\'s going to need a POSTmortem!'));
-  }
-  return Promise.resolve('Neither a GET nor POST request. Weird...');
-});
 
 // TESTS =======================================================
 describe('hacheQL() - client-side wrapper for fetch()', () => {
