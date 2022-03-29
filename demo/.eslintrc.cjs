@@ -3,12 +3,10 @@ module.exports = {
     browser: true,
     es2021: true,
     node: true,
-    'jest/globals': true,
   },
   extends: [
     'plugin:react/recommended',
     'airbnb',
-    'plugin:jest/recommended',
   ],
   parserOptions: {
     ecmaFeatures: {
@@ -19,10 +17,7 @@ module.exports = {
   },
   plugins: [
     'react',
-    'jest',
   ],
   rules: {
-    'max-len': 'off',
-    'newline-per-chained-call': 'off',
   },
 };
