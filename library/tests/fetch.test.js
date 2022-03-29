@@ -71,6 +71,13 @@ describe('hacheQL() - client-side wrapper for fetch()', () => {
       expect.assertions(1);
       expect(Object.hasOwn(hacheQLFetchRequestProfile, 'body')).toBe(false);
     });
+
+    test('If it receives 800, followup request options should be identical to the passed in request options', async () => {
+      global.fetch = mockServer_HashNotFound;
+      await hacheQL(endpointURL, { ...requestOptions, method: 'DELETE' });
+      expect(mockServer_HashNotFound.mock.calls.length).toBe(2);
+      expect(mockServer_HashNotFound.mock.calls[1][1].method).toBe('DELETE');
+    });
   });
 
   describe('Should take appropriate action based on different server responses.', () => {
@@ -78,7 +85,7 @@ describe('hacheQL() - client-side wrapper for fetch()', () => {
       jest.clearAllMocks();
     });
 
-    test('Should make a followup POST request if the initial GET request receives an 800 response.', async () => {
+    test('Should make a followup request if the initial GET request receives an 800 response.', async () => {
       expect.assertions(2);
       global.fetch = mockServer_HashNotFound;
       const response = await hacheQL(endpointURL, requestOptions);
