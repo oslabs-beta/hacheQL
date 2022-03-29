@@ -2,19 +2,8 @@ import express from 'express';
 import path, { dirname } from 'path';
 import { fileURLToPath } from 'url';
 import process from 'process';
-import db from './models/starWarsModel';
-import {
-  GraphQLSchema,
-  GraphQLObjectType,
-  GraphQLString,
-  GraphQLList,
-  GraphQLInt,
-  GraphQLNonNull,
-}
-  from 'graphql';
-
 import { graphqlHTTP } from 'express-graphql';
-import types from './graphql/types';
+import helpers from './graphql/types';
 // import { v4 as uuid } from 'uuid';
 import { checkHash, httpCache } from '../../library/hacheql';
 
@@ -32,13 +21,13 @@ app.use(express.static(path.resolve(folderPath, '../build')));
 
 
 // graphiql req
-app.use('/graphql',
+app.use(
+  '/graphql',
   (req, res, next) => { console.log('request received'); return next(); },
-  checkHash, httpCache,
   graphqlHTTP({
-    schema: types.schema,
+    schema: helpers.schema,
     graphiql: true,
-  })
+  }),
 );
 
 // catch all for pages not found
