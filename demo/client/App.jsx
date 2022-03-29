@@ -15,13 +15,10 @@ function App() {
       },
       body: JSON.stringify({
         query: `{
-          characters {
+          people {
             _id
             name
-            home_planet_id
-            homePlanet {
-              name
-            }
+            homeworld_id
           }
         }`
       })
