@@ -3,6 +3,18 @@ import { jest } from '@jest/globals';
 import sha1 from 'sha1';
 import { hacheQL } from '../hacheql';
 
+/**
+* Function signature
+* hacheQL(endpoint, options) // IS THE OPTIONS OBJECT OPTIONAL?
+
+* This function signature is designed to mimic the fetch API. (In fact, the function uses the fetch API under the hood.)
+* https://developer.mozilla.org/en-US/docs/Web/API/fetch#parameters
+
+* @param {string} endpoint - The endpoint for the GraphQL requests. Analogous to the fetch API's 'resource' parameter.
+* @param {object} options - An object containing settings for the request; for example, the HTTP request method, headers, and request body. Analogous to the fetch API's 'init' parameter. All valid settings for the fetch API's 'init' object are valid for this function's options object.
+* @returns {promise} - A promise that resolves to a response object from the server, or rejects with an error object.
+*/
+
 // GLOBAL CONSTANTS ==================================
 const endpointURL = 'chicken-nuggest'; // yes, 'nuggest'
 const requestOptions = {
