@@ -12,7 +12,7 @@ const requestOptions = {
   },
   body: JSON.stringify(
     {
-      query: `{ 
+      query: `{
           characters {
             _id
             name
@@ -196,7 +196,23 @@ describe('hacheQL() - client-side wrapper for fetch()', () => {
       expect.assertions(1);
       global.fetch = mockErrorGET;
 
-      return hacheQL(endpointURL, requestOptions).catch((error) => expect(error.message).toBe('Ouch! GET me to a doctor!'));
+      // The Jest documentation suggests writing this test like this:
+      // https://jestjs.io/docs/asynchronous#promises
+      // return hacheQL(endpointURL, requestOptions).catch((error) => expect(error.message).toBe('Ouch! GET me to a doctor!'));
+
+      // But ESLint recommends doing it this way instead:
+      // https://github.com/jest-community/eslint-plugin-jest/blob/v26.1.3/docs/rules/no-conditional-expect.md
+      async function hacheQLAttempt() {
+        try {
+          const response = await hacheQL(endpointURL, requestOptions);
+          return response;
+        } catch (error) {
+          return error;
+        }
+      }
+
+      const result = await (hacheQLAttempt());
+      expect(result).toEqual(new Error('Ouch! GET me to a doctor!'));
     });
   });
 });
