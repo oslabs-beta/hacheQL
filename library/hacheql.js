@@ -9,7 +9,7 @@ import sha1 from 'sha1';
 // CLIENT SIDE
 function hacheQL(endpoint, options) {
   const newOpts = { ...options, method: 'GET' };
-  const HASH = sha1(newOpts.body);
+  const HASH = sha1(newOpts.body); // If passed in options object has no body...
   delete newOpts.body;
   console.log(HASH);
   return new Promise((resolve, reject) => {
