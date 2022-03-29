@@ -1,0 +1,86 @@
+const endpointURL = 'chicken-nuggest'; // yes, 'nuggest'
+const requestOptions = {
+  method: 'POST',
+  headers: {
+    'Happy-Meal-Toy': 'Bowser in a Mario Kart car',
+  },
+  body: JSON.stringify(
+    {
+      query: `{
+          characters {
+            _id
+            name
+            win_rate
+            best_time
+            favorite_item
+            arch_nemesis {
+              name
+            }
+          }
+         }`,
+    },
+  ),
+};
+const serverResponse200 = {
+  status: 200,
+  body: JSON.stringify({
+    data: {
+      characters: [
+        {
+          _id: 1,
+          name: 'Mario',
+          win_rate: '54%',
+          best_time: '1:50.713',
+          favorite_item: 'Golden Mushroom',
+          arch_nemesis: {
+            name: 'Bowser',
+          },
+        },
+        {
+          _id: 2,
+          name: 'Princess Peach',
+          win_rate: '78%',
+          best_time: '1:23.402',
+          favorite_item: 'Bob-omb',
+          arch_nemesis: {
+            name: 'Luigi',
+          },
+        },
+        {
+          _id: 3,
+          name: 'Luigi',
+          win_rate: '41%',
+          best_time: '2:09.250',
+          favorite_item: 'Triple Bananas',
+          arch_nemesis: {
+            name: 'Bowser',
+          },
+        },
+        {
+          _id: 4,
+          name: 'Bowser',
+          win_rate: '48%',
+          best_time: '1:56.917',
+          favorite_item: 'Piranha Plant',
+          arch_nemesis: {
+            name: 'Mario',
+          },
+        },
+      ],
+    },
+  }),
+};
+const serverResponse304 = {
+  status: 304,
+};
+const serverResponse800 = {
+  status: 800,
+};
+
+export {
+  endpointURL,
+  requestOptions,
+  serverResponse200,
+  serverResponse304,
+  serverResponse800,
+};
