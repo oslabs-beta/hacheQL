@@ -143,7 +143,7 @@ export function expressHacheQL(opts = {}, cache = {}) {
 export function httpCache(req, res, next) {
   if (req.method === 'GET') {
     res.set({
-      'Cache-Control': 'no-cache',
+      'Cache-Control': 'max-age=5',
       // If we set E-tag here, it will never update
       // Etag: req.query.hash
     });
