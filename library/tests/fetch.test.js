@@ -1,7 +1,7 @@
 /* eslint-disable camelcase */
 import { jest } from '@jest/globals';
 import sha1 from 'sha1';
-import { hacheQL } from '../hacheql';
+import hacheQL from '../hacheql';
 import {
   endpointURL,
   requestOptions,
