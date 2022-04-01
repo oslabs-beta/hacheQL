@@ -1,13 +1,20 @@
-/*
+import sha1 from 'sha1';
+/**
 * @module getWrapper
-* @param {string} query - the string representing the query the client would like to make to the GraphQL service.
-* @params {object} rest parameter representing arguments, except for the method, to be passed to the fetch.
-* @returns {promise} - promise that resolves to the value returned either from the cache or the server, or terminates in an error, unless the error is that the server does not recognize our query param,
+* @param {string} endpoint - the string representing the endpoint the client would like to query.
+* @param {Object} options - options object corresponding to the fetch API specification.
+* @returns {Promise} - promise that resolves to the value returned either from the cache or the server, or terminates in an error, unless the error is that the server does not recognize our query param,
 * in which case the promise does not resolve until a second fetch is sent and returned.
 */
-import sha1 from 'sha1';
-// CLIENT SIDE
+
+const uncacheable = { mutation: true, subscription: true };
+
 function hacheQL(endpoint, options) {
+  const { query } = JSON.parse(options.body);
+  const operationType = query.split('{')[0].trim();
+  if (uncacheable[operationType]) {
+    return fetch(endpoint, options);
+  }
   const newOpts = { ...options, method: 'GET' };
   const HASH = sha1(newOpts.body); // If passed in options object has no body...
   delete newOpts.body;
@@ -19,7 +26,7 @@ function hacheQL(endpoint, options) {
         // It indicates that the request's hash was not found in the server's cache.
         if (data.status === 800) {
           fetch(`${endpoint}/?hash=${HASH}`, options)
-            .then((data) => resolve(data))
+            .then((res) => resolve(res))
             .catch((altErr) => reject(altErr));
         } else {
           resolve(data);
@@ -39,4 +46,4 @@ function hacheQL(endpoint, options) {
   });
 }
 
-export { hacheQL };
+export default hacheQL;

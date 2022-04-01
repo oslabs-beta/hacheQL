@@ -1,5 +1,5 @@
 import React from 'react';
-import { hacheQL } from '../../library/hacheql';
+import hacheQL from '../../library/hacheql';
 
 function App() {
   let t0, t1;

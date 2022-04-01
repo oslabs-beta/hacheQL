@@ -5,7 +5,7 @@ import process from 'process';
 import { graphqlHTTP } from 'express-graphql';
 import schema from './graphql/types';
 // import { v4 as uuid } from 'uuid';
-import { checkHash, httpCache } from '../../library/hacheql-server';
+import { expressHacheQL, httpCache } from '../../library/hacheql-server';
 
 const PORT = 3000;
 
@@ -23,8 +23,12 @@ app.use(express.static(path.resolve(folderPath, '../build')));
 app.use(
   '/graphql',
   (req, res, next) => { console.log('request received'); return next(); },
-  checkHash,
+  expressHacheQL(),
   httpCache,
+  (req, res, next) => {
+    console.log('finished with cycle');
+    return next();
+  },
   graphqlHTTP({
     schema,
     graphiql: true,
