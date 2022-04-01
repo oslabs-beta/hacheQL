@@ -107,7 +107,7 @@ function memSwitch(req, res, key, cache) {
   }
 }
 
-function nodeHacheQL(req, res, opts = {}) {
+export function nodeHacheQL(req, res, opts = {}) {
   const key = decode(req);
   if (opts.redis) {
     return redSwitch(req, res, opts.redis, key);
