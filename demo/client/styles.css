@@ -1,0 +1,60 @@
+body {
+  margin: 0;
+  padding: 0;
+}
+
+button {
+  background-color: linear-gradient(red, yellow); /* Green */
+  border: 1px solid darkgray;
+  border-radius: 5px;
+  padding: auto;
+  color: white;
+  padding: 15px 32px;
+  text-align: center;
+  text-decoration: none;
+  display: inline-block;
+  font-size: 16px;
+}
+
+header {
+  border-bottom: 2px solid lightgray;
+  margin-bottom: 20px;
+  font-weight: normal;
+  letter-spacing: 7.2px;
+}
+
+.demo {
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  align-items: center;
+}
+
+.graph {
+  background: black;
+  border: 1px solid gray;
+  border-radius: 5px;
+  height: 25vh;
+  width: 20rem;
+}
+
+.dashboard {
+  border: 1px solid gray;
+  border-radius: 5px;
+  height:25vh;
+  display:flex;
+  flex-direction: column;
+  justify-content: flex-start;
+}
+
+.demo-display {
+  display: flex;
+
+  gap: 0px;
+}
+
+.query-buttons {
+  margin-top: 20px;
+  display: flex;
+  justify-content: space-evenly;
+}
