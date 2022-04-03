@@ -1,5 +1,5 @@
 /* eslint-disable camelcase */
-import { jest } from '@jest/globals';
+import { describe, jest } from '@jest/globals';
 import sha1 from 'sha1';
 import hacheQL from '../hacheql';
 import {
@@ -146,5 +146,9 @@ describe('hacheQL() - client-side wrapper for fetch()', () => {
       const result = await (hacheQLAttempt());
       expect(result).toEqual(new Error('Yikes! This one\'s going to need a POSTmortem!'));
     });
+  });
+
+  describe('Should send uncacheable GraphQL strings as hashless posts.', () => {
+
   });
 });

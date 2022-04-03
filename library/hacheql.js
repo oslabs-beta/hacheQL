@@ -18,7 +18,6 @@ function hacheQL(endpoint, options) {
   const newOpts = { ...options, method: 'GET' };
   const HASH = sha1(newOpts.body); // If passed in options object has no body...
   delete newOpts.body;
-  console.log(HASH);
   return new Promise((resolve, reject) => {
     fetch(`${endpoint}/?hash=${HASH}`, newOpts)
       .then((data) => {
