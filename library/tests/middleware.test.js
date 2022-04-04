@@ -7,7 +7,7 @@ import { expressHacheQL, nodeHacheQL } from '../hacheql-server';
 // TODO: write test suite for final middleware, ensuring that url return to original
 
 describe('expressHacheQL - server-side function', () => {
-  let cache = {};
+  let cache;
 
   const mockReq = {
     method: 'GET',
@@ -22,12 +22,31 @@ describe('expressHacheQL - server-side function', () => {
     },
   };
 
+  const mockReqFollowupPOST = {
+    method: 'POST',
+    url: '/?hash=arbitraryh4sh',
+    originalUrl: '/graphql?hash=arbitraryh4sh',
+    headers: {
+      accepts: 'application/json',
+      'Content-Type': 'application/json',
+    },
+    body: {
+      query: '{me{name}}',
+      operationName: 'doTheThing',
+      variables: { myVariable: 'someValue' },
+    },
+    query: {
+      hash: 'arbitraryh4sh',
+    },
+  };
+
   let req;
   let res;
   let next;
 
   beforeEach(() => {
     jest.clearAllMocks();
+    cache = {};
     req = httpMocks.createRequest(mockReq);
     res = httpMocks.createResponse();
     next = jest.fn(() => { console.log('called next'); });
@@ -71,7 +90,6 @@ describe('expressHacheQL - server-side function', () => {
 
     it('Should pass the request along to the next piece of middleware if there isn\'t a hash on the search params', () => {
       const newMockReq = { ...mockReq, query: {} };
-      delete newMockReq.query;
       const newMockRes = {
         randoProperty: {
           value: 'rando',
@@ -92,14 +110,39 @@ describe('expressHacheQL - server-side function', () => {
       delete newMockReq.query;
       const reqCopyWithNoQuery = JSON.parse(JSON.stringify(newMockReq));
 
-      configuredMiddleware(reqCopy, resCopy, next);
+      configuredMiddleware(reqCopyWithNoQuery, resCopy, next);
 
       expect(reqCopyWithNoQuery).toEqual(newMockReq);
       expect(resCopy).toEqual(newMockRes);
       expect(next).toBeCalledTimes(2);
     });
 
-    xit('If there\'s an error in the redis cache, it should error 800 and switch to the local cache.', () => {});
+    it.skip('If there\'s an error in the Redis cache, it should error 800 and switch to the local cache.', async () => {
+      // This will simulate the Redis client being down.
+      const fakeRedisClient = {
+        get: jest.fn(() => Promise.reject(new Error('Error occurred while accessing the Redis cache.'))),
+      };
+
+      // Configure our middleware function to use the Redis client.
+      const configuredMiddleware = expressHacheQL({ redis: fakeRedisClient }, cache);
+      // Simulate our function running as part of a middleware chain.
+      await configuredMiddleware(req, res, next);
+
+      // Expect to receive and 800 error here.
+      expect(res.statusCode).toBe(800);
+
+      // Then send a followup post.
+      const followupRequest = httpMocks.createRequest(mockReqFollowupPOST);
+      const followupResponse = httpMocks.createResponse();
+      await configuredMiddleware(followupRequest, followupResponse, next);
+
+      // Expect the key-value pair of hash-query to be saved in the local cache object.
+      expect(cache.arbitraryh4sh).toBe(JSON.stringify({
+        query: '{me{name}}',
+        operationName: 'doTheThing',
+        variables: { myVariable: 'someValue' },
+      }));
+    });
 
     xit('If the redis cache ever errors, ALL subsequent caching should take place in the local memory (potentially update redis cache when back online)', () => {});
   });
