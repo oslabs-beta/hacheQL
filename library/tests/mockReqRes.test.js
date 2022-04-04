@@ -1,21 +1,16 @@
-const endpointURL = 'chicken-nuggest'; // yes, 'nuggest'
+const endpointURL = 'graphql'; // yes, 'nuggest'
 const requestOptions = {
   method: 'POST',
   headers: {
-    'Happy-Meal-Toy': 'Bowser in a Mario Kart car',
+    'Content-Type': 'application/json',
+    accepts: 'application/json',
   },
   body: JSON.stringify(
     {
-      query: `{
-          characters {
+      query: `query {
+          films {
             _id
-            name
-            win_rate
-            best_time
-            favorite_item
-            arch_nemesis {
-              name
-            }
+            title
           }
          }`,
     },
