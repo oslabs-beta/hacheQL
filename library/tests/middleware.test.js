@@ -1,4 +1,4 @@
-import { describe, jest, test } from '@jest/globals';
+import { describe, expect, jest, test } from '@jest/globals';
 import httpMocks from 'node-mocks-http';
 import { expressHacheQL, nodeHacheQL } from '../hacheql-server';
 
@@ -7,44 +7,97 @@ import { expressHacheQL, nodeHacheQL } from '../hacheql-server';
 // TODO: write test suite for final middleware, ensuring that url return to original
 
 describe('expressHacheQL - server-side function', () => {
+  let cache = {};
+
+  const mockReq = {
+    method: 'GET',
+    url: '/?hash=arbitraryh4sh',
+    originalUrl: '/graphql?hash=arbitraryh4sh',
+    headers: {
+      accepts: 'application/json',
+      'Content-Type': 'application/json',
+    },
+    query: {
+      hash: 'arbitraryh4sh',
+    },
+  };
+
+  let req;
+  let res;
+  let next;
+
+  beforeEach(() => {
+    jest.clearAllMocks();
+    req = httpMocks.createRequest(mockReq);
+    res = httpMocks.createResponse();
+    next = jest.fn(() => { console.log('called next'); });
+  });
+
   describe('Cache characteristics', () => {
     it.skip('The cache should be a FIFO heap, with the most recently accessed item moving to the top. It should be configurable to a certain size.', () => {});
   });
+
   describe('GET', () => {
-    const opts = {
-      method: 'GET',
-      url: '/?hash=arbitraryh4sh',
-      originalUrl: '/graphql?hash=arbitraryh4sh',
-      headers: {
-        accepts: 'application/json',
-        'Content-Type': 'application/json',
-      },
-      query: {
-        hash: 'arbitraryh4sh',
-      },
-    };
     it('Should send an 800 response and prevent the execution of any subsequent pieces of middleware if the requested hash is not present in the server\'s cache', async () => {
-      const req = httpMocks.createRequest(opts);
-      const res = httpMocks.createResponse();
-      const next = jest.fn((err) => {
-        if (err) {
-          return err;
-        }
-        return false;
-      });
-      const cache = {};
       const configuredMiddleware = expressHacheQL({}, cache);
       configuredMiddleware(req, res, next);
       expect(res.statusCode).toBe(800);
       expect(next).toBeCalledTimes(0);
     });
 
-    xit(`For a GET request, if the requested hash is present in the cache:
+    it(`For a GET request, if the requested hash is present in the cache:
         If on finishing the execution of our function the request method is a:
-          POST: The associated query should be stored in req.body
-          GET: The associated query should be stored as req.query`, () => {});
+          POST: The associated GraphQL document should be stored at req.body
+          GET: The associated GraphQL document should be stored at req.query`, () => {
+      // The requested hash is present in the cache.
+      cache = {
+        arbitraryh4sh: '{"query":"{me{name}}","operationName":"doTheThing","variables":{"myVariable":"someValue"}}',
+        otherhash: 'incorrect GraphQL document',
+      };
 
-    xit('Should pass the request along to the next piece of middleware if there isn\'t a hash on the search params', () => {});
+      const configuredMiddleware = expressHacheQL({}, cache);
+      configuredMiddleware(req, res, next);
+
+      if (req.method === 'GET') {
+        expect(typeof req.query).toBe('object');
+        expect(req.query).toEqual(JSON.parse(cache.arbitraryh4sh));
+      }
+
+      if (req.method === 'POST') {
+        expect(typeof req.body).toBe('object');
+        expect(req.body).toEqual(JSON.parse(cache.arbitraryh4sh));
+      }
+    });
+
+    it('Should pass the request along to the next piece of middleware if there isn\'t a hash on the search params', () => {
+      const newMockReq = { ...mockReq, query: {} };
+      delete newMockReq.query;
+      const newMockRes = {
+        randoProperty: {
+          value: 'rando',
+        },
+      };
+
+      const reqCopy = JSON.parse(JSON.stringify(newMockReq));
+      const resCopy = JSON.parse(JSON.stringify(newMockRes));
+
+      const configuredMiddleware = expressHacheQL({}, cache);
+      configuredMiddleware(reqCopy, resCopy, next);
+
+      expect(reqCopy).toEqual(newMockReq);
+      expect(resCopy).toEqual(newMockRes);
+      expect(next).toBeCalledTimes(1);
+
+      // And what if there's no 'query' property on the request object at all?
+      delete newMockReq.query;
+      const reqCopyWithNoQuery = JSON.parse(JSON.stringify(newMockReq));
+
+      configuredMiddleware(reqCopy, resCopy, next);
+
+      expect(reqCopyWithNoQuery).toEqual(newMockReq);
+      expect(resCopy).toEqual(newMockRes);
+      expect(next).toBeCalledTimes(2);
+    });
 
     xit('If there\'s an error in the redis cache, it should error 800 and switch to the local cache.', () => {});
 
