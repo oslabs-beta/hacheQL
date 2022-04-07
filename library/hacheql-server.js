@@ -104,6 +104,7 @@ export function expressHacheQL({ redis }, cache = {}) {
             if (!query) {
               return res.sendStatus(800);
             }
+            res.locals.cacheable = true;
             req.query = {};
             req.method = 'POST';
             req.body = JSON.parse(query);
@@ -150,7 +151,7 @@ export function expressHacheQL({ redis }, cache = {}) {
 }
 
 export function httpCache(req, res, next) {
-  if (req.method === 'GET') {
+  if (res.locals.cacheable) {
     res.set({
       'Cache-Control': 'max-age=5',
       // If we set E-tag here, it will never update
