@@ -25,10 +25,6 @@ app.use(
   (req, res, next) => { console.log('request received'); return next(); },
   expressHacheQL(),
   httpCache,
-  (req, res, next) => {
-    console.log('finished with cycle');
-    return next();
-  },
   graphqlHTTP({
     schema,
     graphiql: true,
