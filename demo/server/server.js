@@ -3,11 +3,18 @@ import path, { dirname } from 'path';
 import { fileURLToPath } from 'url';
 import process from 'process';
 import { graphqlHTTP } from 'express-graphql';
+import { createClient } from 'redis';
 import schema from './graphql/types';
 // import { v4 as uuid } from 'uuid';
-import { checkHash, httpCache } from '../../library/hacheql-server';
+import { expressHacheQL, httpCache } from '../../library/hacheql-server';
 
 const PORT = 3000;
+
+const redis = createClient();
+redis.connect();
+redis.on('connect', () => {
+  console.log('connected to redis server!');
+});
 
 // ESM model for __dirname
 const folderPath = dirname(fileURLToPath(import.meta.url));
@@ -22,8 +29,7 @@ app.use(express.static(path.resolve(folderPath, '../build')));
 // graphiql req
 app.use(
   '/graphql',
-  (req, res, next) => { console.log('request received'); return next(); },
-  checkHash,
+  expressHacheQL({ redis }),
   httpCache,
   graphqlHTTP({
     schema,
