@@ -28,6 +28,7 @@
     "node-mocks-http": "^1.11.0"
   },
   "dependencies": {
+    "ci-info": "^3.3.0",
     "redis": "^4.0.4",
     "sha1": "^1.1.1"
   }

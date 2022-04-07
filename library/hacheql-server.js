@@ -94,7 +94,8 @@ export async function nodeHacheQL(req, res, opts, cache = {}, callback = (err, d
   }
 }
 
-export function expressHacheQL(opts, cache = {}) {
+export function expressHacheQL({ redis }, cache = {}) {
+  if (redis) {
     return async function redisHandler(req, res, next) {
       try {
         if (req.method === 'GET') {

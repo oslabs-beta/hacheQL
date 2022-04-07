@@ -64,28 +64,62 @@ describe('expressHacheQL - server-side function', () => {
       expect(next).toBeCalledTimes(0);
     });
 
-    it(`For a GET request, if the requested hash is present in the cache:
-        If on finishing the execution of our function the request method is a:
-          POST: The associated GraphQL document should be stored at req.body
-          GET: The associated GraphQL document should be stored at req.query`, () => {
-      // The requested hash is present in the cache.
-      cache = {
-        arbitraryh4sh: '{"query":"{me{name}}","operationName":"doTheThing","variables":{"myVariable":"someValue"}}',
-        otherhash: 'incorrect GraphQL document',
-      };
+    // This test assume's we're caching in local memory.
+    describe(`For a GET request, if the requested hash is present in the cache:
+              If on finishing the execution of our function the request method is a:
+              POST: The associated GraphQL document should be stored at req.body
+              GET: The associated GraphQL document should be stored at req.query`, () => {
+      it('Caching in local memory', () => {
+        // The requested hash is present in the cache.
+        cache = {
+          // arbitraryh4sh: '{"query":"{me{name}}","operationName":"doTheThing","variables":{"myVariable":"someValue"}}',
+          arbitraryh4sh: {
+            query: '{me{name}}',
+            operationName: 'doTheThing',
+            variables: { myVariable: 'someValue' },
+          },
+          otherhash: 'incorrect GraphQL document',
+        };
 
-      const configuredMiddleware = expressHacheQL({}, cache);
-      configuredMiddleware(req, res, next);
+        const configuredMiddleware = expressHacheQL({}, cache);
+        configuredMiddleware(req, res, next);
 
-      if (req.method === 'GET') {
-        expect(typeof req.query).toBe('object');
-        expect(req.query).toEqual(JSON.parse(cache.arbitraryh4sh));
-      }
+        if (req.method === 'GET') {
+          expect(typeof req.query).toBe('object');
+          expect(req.query).toEqual(cache.arbitraryh4sh);
+        }
 
-      if (req.method === 'POST') {
-        expect(typeof req.body).toBe('object');
-        expect(req.body).toEqual(JSON.parse(cache.arbitraryh4sh));
-      }
+        // JC - technically, this test is not being tested if our mock req object is a GET method right? Additionally, using our middleware, we wouldnt be checking cache under a POST request
+        if (req.method === 'POST') {
+          expect(typeof req.body).toBe('object');
+          expect(req.body).toEqual(cache.arbitraryh4sh);
+        }
+      });
+      // JC - Checking cache using an external cache (redis)? Would we check cache under POST method similar to line 92
+      it('Caching in an external cache (Redis)', async () => {
+        // The requested hash is present in the cache.
+        const fakeRedisCache = {
+          arbitraryh4sh: '{"query":"{me{name}}","operationName":"doTheThing","variables":{"myVariable":"someValue"}}',
+          otherhash: 'incorrect GraphQL document',
+        };
+
+        const fakeRedisClient = {
+          get: jest.fn((key) => fakeRedisCache[key]),
+        };
+
+        const configuredMiddleware = expressHacheQL({ redis: fakeRedisClient });
+        await configuredMiddleware(req, res, next);
+
+        if (req.method === 'GET') {
+          expect(typeof req.query).toBe('object');
+          expect(req.query).toEqual(JSON.parse(fakeRedisCache.arbitraryh4sh));
+        }
+
+        if (req.method === 'POST') {
+          expect(typeof req.body).toBe('object');
+          expect(req.body).toEqual(JSON.parse(fakeRedisCache.arbitraryh4sh));
+        }
+      });
     });
 
     it('Should pass the request along to the next piece of middleware if there isn\'t a hash on the search params', () => {
@@ -136,6 +170,7 @@ describe('expressHacheQL - server-side function', () => {
       const followupResponse = httpMocks.createResponse();
       await configuredMiddleware(followupRequest, followupResponse, next);
 
+      // JC - should we be expecting the cache store to be in object per our last discussion?
       // Expect the key-value pair of hash-query to be saved in the local cache object.
       expect(cache.arbitraryh4sh).toBe(JSON.stringify({
         query: '{me{name}}',
