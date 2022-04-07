@@ -132,6 +132,7 @@ export function expressHacheQL({ redis }, cache = {}) {
           if (!query) {
             return res.sendStatus(800);
           }
+          res.locals.cacheable = true;
           req.query = {};
           req.method = 'POST';
           req.body = query;
