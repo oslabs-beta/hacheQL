@@ -29,7 +29,6 @@ app.use(express.static(path.resolve(folderPath, '../build')));
 // graphiql req
 app.use(
   '/graphql',
-  (req, res, next) => { console.log('request received'); return next(); },
   expressHacheQL({ redis }),
   httpCache,
   graphqlHTTP({
