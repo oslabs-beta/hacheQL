@@ -6,7 +6,7 @@ import { graphqlHTTP } from 'express-graphql';
 import { createClient } from 'redis';
 import schema from './graphql/types';
 // import { v4 as uuid } from 'uuid';
-import { expressHacheQL, httpCache } from '../../library/hacheql-server';
+import { expressHacheQL,  httpCache } from 'hacheql/server';
 
 const PORT = 3000;
 

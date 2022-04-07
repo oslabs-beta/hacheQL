@@ -1,8 +1,12 @@
 {
   "name": "hacheql",
-  "version": "0.0.1",
+  "version": "0.0.8",
   "description": "A library for HTTP caching with GraphQL",
-  "main": "index.js",
+  "main": "hacheql.js",
+  "exports": {
+    ".": "./hacheql.js",
+    "./server": "./hacheql-server.js"
+  },
   "type": "module",
   "scripts": {
     "test": "node --experimental-vm-modules node_modules/jest/bin/jest.js",
