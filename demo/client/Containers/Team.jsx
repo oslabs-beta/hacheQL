@@ -2,6 +2,7 @@ import React from 'react'
 
 //Container for team member components
 export default function Team() {
+  //for rendering components
   const teamMap = [
     {
       name: 'Conor Chinitz',

@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import hacheQL from '../../../library/hacheql';
+import hacheQL from 'hacheql';
 import Graph from '../Components/Graph';
 import Dashboard from '../Components/Dashboard';
 import Scrollview from '../Components/Scrollview';
