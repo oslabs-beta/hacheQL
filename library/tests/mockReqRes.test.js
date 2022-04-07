@@ -1,4 +1,4 @@
-const endpointURL = 'graphql'; // yes, 'nuggest'
+const endpointURL = 'graphql';
 const requestOptions = {
   method: 'POST',
   headers: {
