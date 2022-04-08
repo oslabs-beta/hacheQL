@@ -6,7 +6,7 @@ import { fileURLToPath } from 'url';
 const folderPath = dirname(fileURLToPath(import.meta.url));
 
 const config = {
-  mode: process.env.NODE_ENV,
+  mode: 'development',
   entry: './client/index.jsx',
   resolve: {
     extensions: ['.js', '.jsx'],
@@ -17,7 +17,7 @@ const config = {
     clean: true,
   },
   plugins: [new HtmlWebpackPlugin({ template: './client/index.html' })],
-  devtool: 'inline-source-map',
+  devtool: 'eval-source-map',
   module: {
     rules: [
       {
@@ -37,9 +37,9 @@ const config = {
       {
         test: /\.(png|jpe?g|gif)$/i,
         use: {
-            loader: 'file-loader',
-          },
-      }
+          loader: 'file-loader',
+        },
+      },
     ],
   },
   devServer: {
@@ -47,10 +47,17 @@ const config = {
       directory: path.resolve(folderPath, 'build'),
       publicPath: '/',
     },
-    port: 8888,
+    port: 8080,
+    host: '0.0.0.0',
+    historyApiFallback: true,
     compress: true,
     hot: true,
-    proxy: { '/graphql': 'http://localhost:3000' },
+    headers: { 'Access-Control-Allow-Origin': '*' },
+    proxy: {
+      '/graphql': {
+        target: 'http://localhost:3000', secure: false,
+      },
+    },
   },
 };
 
