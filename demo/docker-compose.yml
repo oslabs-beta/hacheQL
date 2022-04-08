@@ -1,0 +1,25 @@
+version: "3.8"
+services:
+  dev:
+    depends_on:
+      - postgres-db
+    image: hacheql/hql-dev
+    container_name: hql-dev-hot
+    ports:
+      - "8080:8080"
+    volumes:
+      - .:/usr/src/app
+      - node_modules:/usr/src/app/node_modules
+    command: npm run dev:hot
+  postgres-db:
+    image: hacheql/hql-postgres
+    container_name: hql-database
+    environment:
+      - POSTGRES_PASSWORD=admin
+      - POSTGRES_USER=hqladmin
+      - POSTGRES_DB=hqldb
+    volumes:
+      - dev-db-volume:/var/lib/postgresql/data
+volumes:
+  node_modules: {}
+  dev-db-volume: {}
