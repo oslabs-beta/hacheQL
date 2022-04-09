@@ -194,7 +194,13 @@ nodeHacheQL(req, res, opts[, cache, callback(error, query)])
 *IS THIS RIGHT?*
 
 ```javascript
-req.on('data', () => nodeHacheQL(req, res, { redis: <redisClient>}, _, (error, data) => { database.query(data) }));
+server.on('request', async (req, res) => {
+  if (request.url === '/graphql') {
+    const query = await nodeHacheQL(req, res, { redis: redisClient }); 
+    const data = await database.query(query);
+    res.end(data);
+  }
+});
 ```
 
 </details>
