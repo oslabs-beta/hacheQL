@@ -152,6 +152,7 @@ export function expressHacheQL({ redis }, cache = {}) {
 }
 
 export function httpCache(req, res, next) {
+  // expressHacheQL sets res.locals.cacheable to 'true' after successfully retrieving a persisted query from the cache.
   if (res.locals.cacheable) {
     res.set({
       'Cache-Control': 'max-age=5',
