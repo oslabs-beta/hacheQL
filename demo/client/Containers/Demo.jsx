@@ -87,7 +87,7 @@ function Demo() {
   }
 
   return (
-		<div>
+		<div className='demo-container'>
 			<div className='demo'>
 				<div className='demo-display'>
 					<div>
