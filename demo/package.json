@@ -6,8 +6,7 @@
   "main": "server/server.js",
   "scripts": {
     "build": "webpack --config ./webpack.config.js",
-    "dev:hot": "concurrently \"NODE_ENV=development webpack-dev-server --open --hot\" \"NODE_ENV=development nodemon --watch server --watch ../library --experimental-specifier-resolution=node server/server.js\"",
-    "docker-dev:hot": "docker-compose -f ./docker-compose-dev-hot.yml` up",
+    "docker-dev:hot": "docker-compose -f ./docker-compose-dev-hot.yml up",
     "start": "node --experimental-specifier-resolution=node server/server.js;"
   },
   "author": "",
