@@ -18,8 +18,8 @@ The function signature is designed to mimic [the Fetch API](https://developer.mo
   - If the URL contains the GraphQL query in a query string (see the next bullet for an example), then the `options` argument may not be necessary. However, you won't be getting much benefit from HacheQL in that case. HacheQL's real utility comes in caching GraphQL requests made using the POST method (which is far more common).
 
   - An example of a GraphQL query contained in the URL's query string: 
-  ```
-  https://www.hacheql.com/graphql?query=%7B%20hero%20%7B%20name%20%7D%20%7D
+  ```javascript
+  hacheQL('graphql?query=%7B%20hero%20%7B%20name%20%7D%20%7D').then(/* code */)
   ```
 
 - `options` \<Object>
