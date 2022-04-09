@@ -138,16 +138,16 @@ nodeHacheQL(req, res, opts[, cache, callback])
 ```
 
 ### Parameters
-- `req`  
+- `req` \<Object>
   - The HTTP Request object.
-- `res`
+- `res` \<Object>
   - The HTTP Response object.
   - Analogous to the fetch API's 'init' parameter. All valid settings for the fetch API's 'init' object are valid for this function's options object.
-- `opts`
+- `opts` \<Object>
   - *Some options. Need more info here.*
-- `cache` *(optional)*
+- `cache` \<Object> *(optional)*
   - If not specified, defaults to an empty object.
-- `callback` *(optional)*
+- `callback` \<function> *(optional)*
   - If not specified, defaults to:
   ```javascript
   (err, data) => {
@@ -191,7 +191,7 @@ Queries that cacheHandler retrieves from the cache are automatically JSON-parsed
 
 ### Syntax
 ```javascript
-expressHacheQL([ { externalCache} ])
+expressHacheQL([ { externalCache } ])
 ```
 
 ### Parameters  
@@ -243,11 +243,11 @@ httpCache([req, res, next])
 
 ### Parameters
 
-- `req`  
+- `req` \<Object>
   - The HTTP Request object.
-- `res`
+- `res` \<Object>
   - The HTTP Response object.
-- `next`
+- `next` \<Object>
   - The next middleware function.
 
 ### Return value
