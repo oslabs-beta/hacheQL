@@ -23,12 +23,14 @@ export async function nodeHacheQL(req, res, opts, cache = {}, callback = (err, d
   const { searchParams, hash } = strip(req, 'hash');
   try {
     if (redis) {
+      // The .on() method is a method of Node.js's Event Emitter class.
       redis.on('error', () => {
         tripwire = true;
+        // Is this the only thing we want to happen if there's an error? How do we switch to the server memory?
       });
       if (req.method === 'GET') {
         if (hash) {
-          const query = await redis.get(hash);
+          const query = await redis.get(hash); // What happens if there's a Redis error? How do we switch over to the server memory?
           if (!query) {
             res.statusCode = 800;
             res.send();
@@ -83,12 +85,12 @@ export async function nodeHacheQL(req, res, opts, cache = {}, callback = (err, d
       if (hash) {
         internalCache[hash] = query;
       }
-      return callback(undefined, JSON.parse(query));
+      return callback(undefined, JSON.parse(query)); // What if the query isn't JSON? What if they used content-type application/graphql?
     }
     return callback();
   } catch (e) {
     if (!(e instanceof URIError)) {
-      return callback(e);
+      return callback(e); // Does this end up sending the 800 response back to the client? What if the user passed in their own callback function?
     }
     return undefined;
   }
