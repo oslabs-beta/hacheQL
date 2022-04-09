@@ -7,7 +7,7 @@ HacheQL is a JavaScript library that brings HTTP caching to your GraphQL API.
 - Automatically creates and caches persisted GraphQL queries.
 - Integrates with any server running on Node.js.
 - Includes specialized support for servers written with Express.js.
-- Supports caching with Redis, caching in the server's local memory, or a hybrid of the two.
+- Supports caching with Redis or in the server's local memory.
 
 Check out [our demo site](https://www.hacheql.com/) to see what HacheQL can do.
 
@@ -65,10 +65,8 @@ import { expressHacheQL, httpCache } from 'hacheql/server';
 3. Use `expressHacheQL` as the first piece of middleware in routes that handle GraphQL requests.  
 If you want to cache using Redis, pass `expressHacheQL` a reference to your Redis client.
 
-For example:
-
 ```javascript
-app.use('/graphql', expressHacheQL({ redis }), /* other middleware */);
+app.use('/graphql', expressHacheQL({ redisClient }), /* other middleware */);
 ```
 
 If you aren't using Redis, don't pass any arguments to `expressHacheQL` and it will automatically use the server's memory for caching.
@@ -79,12 +77,10 @@ app.use('/graphql', expressHacheQL(), /* other middleware */);
 
 4. Use `httpCache` as the *[WHAT? LAST? ALMOST LAST? JUST PRIOR TO THE GRAPHQL QUERY HANDLER??]* piece of middleware.
 
-For example:
-
 ```javascript
 app.use(
   '/graphql',
-  expressHacheQL({ redis }),
+  expressHacheQL({ redisClient }),
   httpCache,
   graphqlHTTP({ schema, graphiql: true,}),
 );
@@ -114,7 +110,7 @@ For example, here's how you might send a GraphQL request using the Fetch API:
       method: 'POST',
       headers: { 'Content-Type': 'application/graphql' },
       body: '{ hero { name } }'
-      })
+    })
     .then(/* code */)
 ```
 
@@ -125,7 +121,7 @@ And here's what that same request looks like using HacheQL:
       method: 'POST',
       headers: { 'Content-Type': 'application/graphql' },
       body: '{ hero { name } }'
-      })
+    })
     .then(/* code */)
 ```
 
@@ -138,7 +134,7 @@ Thanks for using HacheQL!
 
 ## Other Stuff
 
-If you're interested in more technical specifics, check out the [Documentation](DOCUMENTATION.md).
+If you're interested in technical specifics and more sample usage, check out the [Documentation](DOCUMENTATION.md).
 
 If you'd like to contribute, read our [Contributing Guide](CONTRIBUTING.md).
 
