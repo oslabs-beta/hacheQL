@@ -45,13 +45,10 @@ app.use((err, req, res, next) => {
   return res.status(errorObj.status).json(errorObj.message);
 });
 
-const server = app.listen(PORT, () => console.log(`Listening on port ${PORT}`));
+app.listen(PORT, () => console.log(`Listening on port ${PORT}`));
 
-const closeServer = util.promisify(server.close.bind(server));
-
-async function shutdown() {
+function shutdown() {
   try {
-    await closeServer();
     console.log('Successfully shutting down.');
     process.exit(0);
   } catch (e) {
