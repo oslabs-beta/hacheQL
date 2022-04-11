@@ -46,7 +46,23 @@ app.use((err, req, res, next) => {
 
 app.listen(PORT, () => console.log(`Listening on port ${PORT}`));
 
+function shutdown() {
+  try {
+    console.log('Successfully shutting down.');
+    process.exit(0);
+  } catch (e) {
+    console.log('Error in shutdown process.');
+    console.error(e);
+    process.exit(1);
+  }
+}
+
+process.on('SIGTERM', () => {
+  console.log('caught SIGTERM.');
+  shutdown();
+});
+
 process.on('SIGINT', () => {
   console.log('\nGracefully shutting down API server');
-  process.kill(process.pid, 'SIGTERM');
+  shutdown();
 });
