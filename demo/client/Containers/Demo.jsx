@@ -88,6 +88,7 @@ function Demo() {
 
   return (
 		<div className='demo-container'>
+      <h2>Try out our Demo</h2>
 			<div className='demo'>
 				<div className='demo-display'>
 					<div>

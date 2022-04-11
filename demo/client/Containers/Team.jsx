@@ -29,7 +29,7 @@ export default function Team() {
     {
       name: 'Jason Lin',
       profilePicture: 'https://media-exp1.licdn.com/dms/image/C5603AQHu80pB8zgfXg/profile-displayphoto-shrink_400_400/0/1590692695492?e=1654732800&v=beta&t=fiOf92V5G0yWv5U8GhGPRewYPMjvJhO0Gk_KBgVYY3I',
-      bio: "Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Dictum non consectetur a erat. Elit at imperdiet dui accumsan sit amet nulla facilisi morbi.",
+      bio: "Jason Lin is a full-stack software engineer based in New York City with experience in React, GraphQL, Node.JS and Express. His current fascination is the implication of machine learning in web development. When he is not attempting to usher in an age of AI overlords, you can find him tending to his cats, practicing his knife skills in the kitchen or finding himself immerse in fantasy RPG's.",
       gitHub: 'https://github.com/jvenlin',
       linkedin: 'https://www.linkedin.com/in/jplin/'
     },
@@ -46,7 +46,7 @@ export default function Team() {
   });
   return (
     <div className='team-container'>
-      <h2 style={{textAlign:'center'}}>Meet The Team!</h2>
+      <h2>Meet The Team!</h2>
       <div className='team'>
         {teamMap} 
       </div>
