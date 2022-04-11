@@ -130,8 +130,8 @@ header {
 
 
 .profile {
-  width: 100% !important;
-  max-width: 275px !important;
+  width: 100%;
+  max-width: 275px;
   height: 810px;
   text-align: center;
   color: gray;
@@ -158,6 +158,6 @@ header {
 }
 
 .social-logo {
-  width: 50px !important;
-  max-width: 100px !important;
+  width: 50px;
+  max-width: 100px;
 }
