@@ -1,0 +1,25 @@
+version: "3.8"
+services:
+  dev:
+    depends_on:
+      - postgres-db
+    image: hacheql/hql-dev
+    container_name: hql-dev-hot
+    ports:
+      - "8080:8080"
+    volumes:
+      - .:/usr/src/app
+      - node_modules:/usr/src/app/node_modules
+    command: ["./node_modules/.bin/concurrently", "\"NODE_ENV=development ./node_modules/webpack-dev-server/bin/webpack-dev-server.js --open --hot\"", "\"NODE_ENV=development ./node_modules/nodemon/bin/nodemon.js --verbose --watch server --experimental-specifier-resolution=node server/server.js\""]
+  postgres-db:
+    image: hacheql/hql-postgres
+    container_name: hql-database
+    environment:
+      - POSTGRES_PASSWORD=admin
+      - POSTGRES_USER=hqladmin
+      - POSTGRES_DB=hqldb
+    volumes:
+      - dev-db-volume:/var/lib/postgresql/data
+volumes:
+  node_modules: {}
+  dev-db-volume: {}

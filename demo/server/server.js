@@ -3,18 +3,11 @@ import path, { dirname } from 'path';
 import { fileURLToPath } from 'url';
 import process from 'process';
 import { graphqlHTTP } from 'express-graphql';
-import { createClient } from 'redis';
 import schema from './graphql/types';
 // import { v4 as uuid } from 'uuid';
 import { expressHacheQL, httpCache } from 'hacheql/server';
 
 const PORT = 3000;
-
-const redis = createClient();
-redis.connect();
-redis.on('connect', () => {
-  console.log('connected to redis server!');
-});
 
 // ESM model for __dirname
 const folderPath = dirname(fileURLToPath(import.meta.url));
@@ -29,7 +22,7 @@ app.use(express.static(path.resolve(folderPath, '../build')));
 // graphiql req
 app.use(
   '/graphql',
-  expressHacheQL({ redis }),
+  expressHacheQL({}),
   httpCache,
   graphqlHTTP({
     schema,
@@ -53,7 +46,23 @@ app.use((err, req, res, next) => {
 
 app.listen(PORT, () => console.log(`Listening on port ${PORT}`));
 
+function shutdown() {
+  try {
+    console.log('Successfully shutting down.');
+    process.exit(0);
+  } catch (e) {
+    console.log('Error in shutdown process.');
+    console.error(e);
+    process.exit(1);
+  }
+}
+
+process.on('SIGTERM', () => {
+  console.log('caught SIGTERM.');
+  shutdown();
+});
+
 process.on('SIGINT', () => {
   console.log('\nGracefully shutting down API server');
-  process.kill(process.pid, 'SIGTERM');
+  shutdown();
 });
