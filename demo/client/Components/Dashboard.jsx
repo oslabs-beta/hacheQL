@@ -3,7 +3,6 @@ import React from 'react'
 export default function Dashboard(props) {
   const { fetchTimes } = props;
   const uncachedTime = parseFloat(fetchTimes[2]).toFixed(2)
-  const display = isNaN(uncachedTime)? '0.00 ms': uncachedTime + ' ms'
   const latestTime = parseFloat(fetchTimes[fetchTimes.length - 1]).toFixed(2);
   const avgFetchTime = parseFloat(fetchTimes.slice(2).reduce((a, b) => a + b, 0)/(fetchTimes.length-1)).toFixed(2);
 
