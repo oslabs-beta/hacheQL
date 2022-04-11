@@ -11,7 +11,7 @@ export default function info() {
       <h2>About HacheQL</h2>
       <div className='info'>
         <h3>HacheQL is a lightweight open source Javascript library that provides a solution of HTTP caching for GraphQL. Download our package and get started:</h3>
-        <a href='https://www.npmjs.com/package/hacheql'>
+        <a href='https://www.npmjs.com/package/hacheql' target="_blank">
           <img className='npm-logo' src={npm}></img>
         </a>
         <p>GraphQL provides an alternative to traditional RESTful architecture, emphasizing customization over optimization. This tradeoff highlights one of the prevalent shortcomings of GraphQL architecture, its nightmarish relationship with caching.</p>
