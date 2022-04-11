@@ -12,7 +12,7 @@ export default function Dashboard(props) {
     <div className='dashboard'>
       <h3>Metrics:</h3>
       <div>Uncached Time:
-        <div>{isNaN(uncachedTime)? '0.00 ms': uncachedTime + ' ms'}</div>
+        <div>{isNaN(uncachedTime) ? '0.00 ms': uncachedTime + ' ms'}</div>
       </div>
       <div>Latest Fetch Time:
         <div>{latestTime + ' ms'}</div>
