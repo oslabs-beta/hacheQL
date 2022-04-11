@@ -18,6 +18,9 @@ body {
   border-bottom: 2px solid lightgray;
 }
 
+.graphql-rest-image {
+  max-width: 1000px;
+}
 /* Demo Section  */
 button {
   background-color: linear-gradient(red, yellow); /* Green */
@@ -39,9 +42,6 @@ header {
   letter-spacing: 7.2px;
 }
 
-.demo-container {
-  
-}
 .demo {
   display: flex;
   flex-direction: column;
@@ -91,18 +91,25 @@ header {
   width: 100% !important;
   max-width: 275px !important;
   height: 810px;
+  text-align: center;
 }
 
 .profile-pic {
-  width: 100px;
-  height: 100px;
+  height: 25%;
   border-radius: 50%;
 }
+
 .team {
   margin: auto;
   display: grid;
   grid-template-columns: 1fr 1fr 1fr 1fr;
   justify-items: center;
+  column-gap: 20px;
   top: 0;
   max-width: auto;
+}
+
+.social-logo {
+  width: 50px !important;
+  max-width: 100px !important;
 }
