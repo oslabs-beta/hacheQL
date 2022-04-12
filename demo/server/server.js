@@ -4,7 +4,6 @@ import { fileURLToPath } from 'url';
 import process from 'process';
 import { graphqlHTTP } from 'express-graphql';
 import schema from './graphql/types';
-// import { v4 as uuid } from 'uuid';
 import { expressHacheQL, httpCache } from 'hacheql/server';
 
 const PORT = 3000;

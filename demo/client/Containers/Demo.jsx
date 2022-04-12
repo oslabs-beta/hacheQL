@@ -141,6 +141,7 @@ function Demo() {
   const handleChange = (event) => {
     console.log(event.target.value)
     setQueryString(event.target.value);
+    setFetchTimes([0, 0])
   }
 
   return (
@@ -164,13 +165,12 @@ function Demo() {
 				</div>
 			</div>
 			<div className='query-buttons'>
-          <select value={queryString} onChange={handleChange}>
+          <select className='dropdown' value={queryString} onChange={handleChange}>
             <option value={'Query String Here'}>None Selected</option>
             <option value={querySelect.films}>Query for films</option>
             <option value={querySelect.planets}>Query for planets</option>
             <option value={querySelect.species}>Query for species</option>
             <option value={querySelect.vessels}>Query for vessels</option>
-            <option value={querySelect.mutation}>Mutation query to add a film</option>
           </select>
 				<button className='get-button' onClick={runQuery}>Run Query</button>
 				<button className='mutation-button' onClick={addOne}>Run Mutation</button>

@@ -5,9 +5,9 @@ import Logo from '../../images/Logo.png';
 export default function Headers() {
 
   return (
-		<header style={{display: 'flex', justifyContent: 'center', alignItems: 'center'}}>
+		<header style={{display: 'flex', justifyContent:'center', alignItems: 'center'}}>
 			<div id='logo-main-container'>
-				<img id='logo_main' src={Logo} width={600} style={{margin:'20px'}}></img>
+				<img id='logo_main' src={Logo} style={{margin:'auto', width: '600px'}}></img>
 			</div>
 		</header>
   )

@@ -1,3 +1,7 @@
+/**
+* @module hacheQL/server
+*/
+
 function strip(req, key) {
   const url = new URL(req.url, `http://${req.headers.host}`);
   const { searchParams } = url;
@@ -30,7 +34,7 @@ export async function nodeHacheQL(req, res, opts, cache = {}, callback = (err, d
         if (hash) {
           const query = await redis.get(hash);
           if (!query) {
-            res.statusCode = 800;
+            res.statusCode = 303;
             res.send();
             throw new URIError();
           }
@@ -60,7 +64,7 @@ export async function nodeHacheQL(req, res, opts, cache = {}, callback = (err, d
     if (req.method === 'GET') {
       if (hash) {
         if (!internalCache[hash]) {
-          res.statusCode = 800;
+          res.statusCode = 303;
           res.send();
           throw new URIError();
         }
@@ -102,7 +106,7 @@ export function expressHacheQL({ redis }, cache = {}) {
           if (Object.hasOwn(req.query, 'hash')) {
             const query = await redis.get(req.query.hash);
             if (!query) {
-              return res.sendStatus(800);
+              return res.sendStatus(303);
             }
             res.locals.cacheable = true;
             req.query = {};
@@ -130,7 +134,7 @@ export function expressHacheQL({ redis }, cache = {}) {
         if (Object.hasOwn(req.query, 'hash')) {
           const query = internalCache[req.query.hash];
           if (!query) {
-            return res.sendStatus(800);
+            return res.sendStatus(303);
           }
           res.locals.cacheable = true;
           req.query = {};
