@@ -16,6 +16,7 @@ h2 {
   background: linear-gradient(to right, #333, #eee, #333);
   -webkit-background-clip: text;
   -webkit-text-fill-color: transparent;
+  margin: 20px;
 }
 
 
@@ -53,13 +54,19 @@ h2 {
   width: 75%;
   height: 75%;
 }
+
 .both-image-container {
   text-align: center;
   max-width: 1000px;
 }
+
 .both-image {
   width: 75%;
   height: 75%;
+}
+
+cite {
+  font-size: smaller;
 }
 /* Demo Section  */
 button {
@@ -148,7 +155,6 @@ header {
 }
 
 .team {
-  margin: auto;
   display: grid;
   grid-template-columns: 1fr 1fr 1fr 1fr;
   justify-items: center;

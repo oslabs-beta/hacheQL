@@ -9,22 +9,6 @@ export default function Headers() {
 			<div id='logo-main-container'>
 				<img id='logo_main' src={Logo} width={600} style={{margin:'20px'}}></img>
 			</div>
-			{/* <ul className='header-links'>
-			 	<li>
-          <a>INFO</a>
-        </li>
-        <li>
-          <a>DEMO</a>
-        </li>
-        <li>
-          <a>TEAM</a>
-        </li>
-        <li>
-          <a href='https://github.com/oslabs-beta/hacheQL/' target='_blank'>
-            GITHUB
-          </a>
-        </li>
-      </ul> */}
 		</header>
   )
 }
