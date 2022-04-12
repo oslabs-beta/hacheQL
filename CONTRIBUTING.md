@@ -35,9 +35,9 @@ git remote add upstream https://github.com/oslabs-beta/hacheQL.git
 ## Making A Pull Request
 
 1. Make sure that: 
-  - your branch is up-to-date with the repo's main branch
-  - `eslint` is not identifying style errors in your code
-  - your code passes the test suite (you did add tests, right??)
+    - your branch is up-to-date with the repo's main branch
+    - `eslint` is not identifying style errors in your code
+    - your code passes the test suite (you did add tests, right??)
 4. If you've changed the API, please update [Documentation.md](DOCUMENTATION.md).
 5. Commit your changes.
     - Ex: `git commit -m 'Add ice cream sundae machine'`
@@ -47,4 +47,4 @@ git remote add upstream https://github.com/oslabs-beta/hacheQL.git
 ![](pull-request.png)
 
 ## License
-By contributing, you agree that your contributions will be licensed under HacheQL's MIT License.
+By contributing, you agree that your contributions will be licensed under HacheQL's [MIT License](LICENSE).
