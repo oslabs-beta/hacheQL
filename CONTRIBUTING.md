@@ -30,19 +30,19 @@ git remote add upstream https://github.com/oslabs-beta/hacheQL.git
     - Our test suite is written with [Jest](https://jestjs.io/).
 6. Write some code!
     - As you work, make frequent commits and leave comments on the Github issue about your progress.
-    - Feel free to update the website to reflect a new feature, if it makes sense to do so. The source files are in the `/demo` directory.
+    - Feel free to update the website to reflect a new feature, if it makes sense to do so. The source files are in the `demo/` directory.
 
 ## Making A Pull Request
 
 1. Make sure that: 
-    - your branch is up-to-date with the repo's main branch
-    - `eslint` is not identifying style errors in your code
+    - your bugfix/feature branch is up-to-date with the repo's main branch
+    - your code follows the project's `eslint` configuration
     - your code passes the test suite (you did add tests, right??)
 4. If you've changed the API, please update [Documentation.md](DOCUMENTATION.md).
 5. Commit your changes.
-    - Ex: `git commit -m 'Add ice cream sundae machine'`
+    - Ex: `git commit -m 'Add ice cream sundae machine.'`
 6. Push to your fork of the main repo.
-    - Ex: `git push origin feature/ice-cream-sundae-machine`
+    - Ex: `git push origin 42-feature/ice-cream-sundae-machine`
 7. Open a pull request on GitHub.
 ![](pull-request.png)
 
