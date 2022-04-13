@@ -17,5 +17,6 @@ module.exports = {
   rules: {
     'max-len': 'off',
     'newline-per-chained-call': 'off',
+    "no-param-reassign": 0,
   },
 };

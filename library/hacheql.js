@@ -29,11 +29,12 @@ function hacheQL(endpoint, options) {
   const newOpts = { ...options, method: 'GET' };
   const HASH = sha1(newOpts.body);
   delete newOpts.body;
-  // Construct new Promise to allow wrapper function to behave as normal fetch
+  // Construct new Promise to allow wrapper function to behave as a normal fetch
   return new Promise((resolve, reject) => {
     fetch(`${endpoint}/?hash=${HASH}`, newOpts)
       .then((data) => {
-        // Status 303, indicating hash is not found in server cache
+        // Status 303 indicates that hash is not found in server cache
+        // Upon receipt, send original request as follow-up 
         if (data.status === 303) {
           fetch(`${endpoint}/?hash=${HASH}`, options)
             .then((res) => resolve(res))

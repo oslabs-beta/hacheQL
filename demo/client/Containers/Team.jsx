@@ -15,7 +15,7 @@ export default function Team() {
     {
       name: 'Joey Torsella',
       profilePicture: 'https://media-exp1.licdn.com/dms/image/C4E03AQGCg4c9x_y5mg/profile-displayphoto-shrink_400_400/0/1583352367275?e=1654732800&v=beta&t=kZTxIN6WDvhsKIVkeNVhgBqmh97AmtSudebiuCPbY0c',
-      bio: "Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Dictum non consectetur a erat. Elit at imperdiet dui accumsan sit amet nulla facilisi morbi.",
+      bio: "Joey is a software engineer who is driven to understand how systems of all kinds work. In the work he did on HacheQL, he especially enjoyed engineering middleware to function under a wide range of use conditions and thinking systematically about what those conditions might be. When not programming, he enjoys fitness and philosophy.",
       gitHub: 'https://github.com/neovimnovum',
       linkedin: 'https://www.linkedin.com/in/joseph-r-torsella/'
     },

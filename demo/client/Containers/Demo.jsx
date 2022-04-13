@@ -5,16 +5,11 @@ import Dashboard from '../Components/Dashboard';
 import Scrollview from '../Components/Scrollview';
 
 function Demo() {   
-  const placeholderText = `
-  \n Select a type of query and run the query
-  \n Note the performance improvement on subsequent requests
-  \n Test out a simple mutation query, it passes through unaffected
-  `;
 	const [fetchTimes, setFetchTimes] = useState([0, 0]); 
   const [queryResult, setQueryResult] = useState('Query Result Here');
   const [queryString, setQueryString] = useState('Query String Here')
 
-
+  // GraphQL query types
   const querySelect = {
     films:  
     `{
@@ -88,9 +83,7 @@ function Demo() {
         cargo_capacity
         consumables
       }
-    }`,
-    mutation: "mutation addEpisodeEight($_id: BigInt!, $title: String!, $episode_id: Int!, $opening_crawl: String!, $director: String!, $producer: String!, $release_date: Date!){\n  addFilm(_id: $_id, title: $title, episode_id: $episode_id, opening_crawl: $opening_crawl, director: $director, producer: $producer, release_date: $release_date) {\n    _id\n    title\n    episode_id\n    director\n    producer\n    opening_crawl\n    release_date\n  }\n}","variables":{"_id":"8","title":"The Last Query","episode_id":8,"opening_crawl":"Help arrives to our graphql heroes: beset by evil on all sides, they fight through the difficulty and triumph over the evil Meta empire and its overlord, Darth Zucc.","director":"JJ Abrams","producer":"JJ Abrams","release_date":"05 October 2011 14:48 UTC"},"operationName":"addEpisodeEight"
-    
+    }`
   }
 
   let t0, t1;
@@ -108,7 +101,6 @@ function Demo() {
       })
     })
       .then((res) => res.json())
-      // .then((data) => console.log(data.data))
       .then((data) => {
         // timer ends after fetch returns data
         t1 = performance.now();
