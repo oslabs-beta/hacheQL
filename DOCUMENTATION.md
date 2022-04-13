@@ -221,13 +221,18 @@ Invoking expressHacheQL returns a function to be used as part of the middleware 
 
 ### Syntax
 ```javascript
-expressHacheQL([ { cachingClient } ])
+expressHacheQL([options, customCache])
 ```
 
 ### Parameters  
-- `externalCache` \<Object> *(optional)*
-  - An object wrapping your caching client.
-  - If not provided expressHacheQL uses the server's memory for caching.
+- `options` \<Object> *(optional)*
+  - An object with settings. If not provided, expressHacheQL uses the server's memory for caching.
+  - There is currently only one setting available (the `redis` setting), but more may be added in the future.
+  - To use Redis for caching, give the object a property with the key `redis`.
+    - `redis`: \<your Redis client>
+- `customCache` \<Object> *(optional)*
+  - An object to use as a cache. If not provided, defaults to an empty JavaScript object.
+  - If a Redis cache was specified, expressHacheQL uses that for caching.
   
 ### Return value
 \<function>
@@ -249,6 +254,12 @@ If you want to cache using Redis, provide a reference to your Redis client as a 
 
 ```javascript
 app.use('/graphql', expressHacheQL({ redis: <redisClient> }), /* other middleware */);
+```
+  
+If you want to cache in some other object, provide that object as a second argument to the function.
+
+```javascript
+app.use('/graphql', expressHacheQL({}, <customCacheObject>), /* other middleware */);
 ```
 
 </details>
