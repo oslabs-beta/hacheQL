@@ -18,7 +18,7 @@ export function expressHacheQL({ redis } = {}, cache = {}) {
     return async function redisHandler(req, res, next) {
       try {
         if (req.method === 'GET') {
-          // Setting this value tells the httpCache() function to set cache control headers on the response object.
+          // Setting this value on res.locals tells the httpCache() function to set cache control headers on the response object.
           res.locals[cacheable] = true; 
           
           // If a GET request was sent with HacheQL, the URL will have a 'hash' property in the query string.
@@ -127,7 +127,7 @@ function defaultCallback(err, data) {
 }
 
 // Once-ify setting up the error event listener on the Redis client. <-- This comment is bad. Will fix.
-// let errorListenerIsSetUp = false;
+let errorListenerIsSetUp = false;
 
 export async function nodeHacheQL(req, res, opts = {}, cache = {}, callback = defaultCallback) {
   // Verify Redis connection has never failed, if truthy default to cache.
@@ -140,32 +140,34 @@ export async function nodeHacheQL(req, res, opts = {}, cache = {}, callback = de
   try {
     // If Redis Client object exists, use it as our cache.
     if (redis) {
-      // if (!errorListenerIsSetUp) {
+      if (!errorListenerIsSetUp) {
         redis.on('error', () => {
           redisFailed = true;
         });
-      //   errorListenerIsSetUp = true;
-      // }
-      // If request method is a GET...
+        errorListenerIsSetUp = true;
+      }
       if (req.method === 'GET') {
         if (!res.locals) {
           res.locals = {};
         }
-        res.locals[cacheable] = true; // Symbol to account for error from user input within res.locals.
+        // Setting this value on res.locals tells the httpCache() function to set cache control headers on the response object.
+        res.locals[cacheable] = true;
         if (hash) {
-          const query = await redis.get(hash); // Return query string from Redis cache
+          const query = await redis.get(hash);
           if (!query) {
+            // Status code 303 asks the client to make a followup HTTP request with the query included.
             res.statusCode = 303;
             res.send();
-            throw new URIError(); // End the middleware chain
+            throw new URIError(); // Break
           }
-          return callback(undefined, JSON.parse(query)); // Return query object that resolves with requested data
+          return callback(null, JSON.parse(query));
         }
-        return callback(undefined, Object.fromEntries(searchParams.entries())); // Return reconstructed query objected from search params and resolve with requested data
+        // The searchParams.entries returns an iterator, which we then turn into a regular JS Object.
+        // https://developer.mozilla.org/en-US/docs/Web/API/URLSearchParams
+        return callback(null, Object.fromEntries(searchParams.entries())); 
       }
-      // If request is a POST...
       if (req.method === 'POST') {
-        // chunk the request data
+        // Construct the request body from the readable stream.
         const query = await (() => (
           new Promise((resolve) => { 
             const buffers = [];
@@ -173,13 +175,14 @@ export async function nodeHacheQL(req, res, opts = {}, cache = {}, callback = de
               buffers.push(chunk);
             });
             req.on('end', () => {
-              resolve(Buffer.concat(buffers).toString()); // reconstruct from data stream
+              resolve(Buffer.concat(buffers).toString());
             });
           })))();
+
         if (hash) {
-          await redis.set(hash, query); // set key-value pair of hash and query string
+          await redis.set(hash, query);
         }
-        return callback(undefined, JSON.parse(query)); // Return query object that resolves with requested data
+        return callback(null, JSON.parse(query));
       }
       return callback();
     }
@@ -188,18 +191,23 @@ export async function nodeHacheQL(req, res, opts = {}, cache = {}, callback = de
       if (!res.locals) {
         res.locals = {};
       }
+      // Setting this value on res.locals tells the httpCache() function to set cache control headers on the response object.
       res.locals[cacheable] = true;
       if (hash) {
         if (!cache[hash]) {
+          // Status code 303 asks the client to make a followup HTTP request with the query included.
           res.statusCode = 303;
           res.send();
-          throw new URIError();
+          throw new URIError(); // Break
         }
-        return callback(undefined, cache[hash]);
+        return callback(null, cache[hash]);
       }
-      return callback(undefined, Object.fromEntries(searchParams.entries()));
+      // The searchParams.entries returns an iterator, which we then turn into a regular JS Object.
+      // https://developer.mozilla.org/en-US/docs/Web/API/URLSearchParams
+      return callback(null, Object.fromEntries(searchParams.entries())); 
     }
     if (req.method === 'POST') {
+      // Construct the request body from the readable stream.
       const query = await (() => (
         new Promise((resolve) => {
           const buffers = [];
@@ -211,29 +219,34 @@ export async function nodeHacheQL(req, res, opts = {}, cache = {}, callback = de
           });
         })
       ))();
+
       if (hash) {
         cache[hash] = query;
       }
-      return callback(undefined, JSON.parse(query));
+      return callback(null, JSON.parse(query));
     }
     return callback();
-  } catch (e) {
-    if (!(e instanceof URIError)) {
-      return callback(e);
+  } catch (err) {
+    if (!(err instanceof URIError)) {
+      return callback(err);
     }
     return undefined;
   }
 }
 
 
-export function httpCache(req, res, next) {
-  if (res.locals[cacheable]) {
-    res.set({
-      'Cache-Control': 'max-age=5',
-      // If we set E-tag here, it will never update
-      // Etag: req.query.hash
-    });
+export function httpCache(customHeaders) {
+  const defaultHeaders = {
+    'Cache-Control': 'max-age=5',
+  };
+
+  const finalHeaders = { ...defaultHeaders, ...customHeaders };
+
+  return function setHeaders(req, res, next) {
+    if (res.locals[cacheable]) {
+      res.set(finalHeaders);
+    }
+    return next();
   }
-  return next();
 }
 

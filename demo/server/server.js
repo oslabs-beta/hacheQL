@@ -22,7 +22,7 @@ app.use(express.static(path.resolve(folderPath, '../build')));
 app.use(
   '/graphql',
   expressHacheQL(),
-  httpCache,
+  httpCache({'Cache-Control': 'no-cache'}),
   graphqlHTTP({
     schema,
     graphiql: true,

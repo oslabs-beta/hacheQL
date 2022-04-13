@@ -1,5 +1,6 @@
 import React from 'react'
 import TeamMember from '../Components/TeamMember';
+import { v4 as uuidv4 } from 'uuid';
 
 //Container for team member components
 export default function Team() {
@@ -42,6 +43,7 @@ export default function Team() {
       bio={member.bio}
       gitHub={member.gitHub}
       linkedIn={member.linkedin}
+      key={uuidv4()}
     />
   });
   return (
