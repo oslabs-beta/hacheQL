@@ -10,6 +10,7 @@ services:
     volumes:
       - .:/usr/src/app
       - node_modules:/usr/src/app/node_modules
+      - ../library/.:/usr/src/app/node_modules/hacheql/
     command: ["./node_modules/.bin/concurrently", "\"NODE_ENV=development ./node_modules/webpack-dev-server/bin/webpack-dev-server.js --open --hot\"", "\"NODE_ENV=development ./node_modules/nodemon/bin/nodemon.js --verbose --watch server --experimental-specifier-resolution=node server/server.js\""]
   postgres-db:
     image: hacheql/hql-postgres

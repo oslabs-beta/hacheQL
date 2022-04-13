@@ -1,6 +1,5 @@
 import HtmlWebpackPlugin from 'html-webpack-plugin';
 import path, { dirname } from 'path';
-// import dotenv from 'dotenv';
 import { fileURLToPath } from 'url';
 
 const folderPath = dirname(fileURLToPath(import.meta.url));

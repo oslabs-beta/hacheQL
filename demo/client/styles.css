@@ -16,8 +16,8 @@ h2 {
   background: linear-gradient(to right, #333, #eee, #333);
   -webkit-background-clip: text;
   -webkit-text-fill-color: transparent;
+  margin: 20px;
 }
-
 
 /* Info Section */
 .info-container {
@@ -50,20 +50,25 @@ h2 {
   max-width: 1000px;
 }
 .hacheql-image {
-  width: 75%;
-  height: 75%;
+  width: 50%;
+  height: 50%;
 }
+
 .both-image-container {
   text-align: center;
   max-width: 1000px;
 }
+
 .both-image {
-  width: 75%;
-  height: 75%;
+  width: 50%;
+  height: 50%;
+}
+
+cite {
+  font-size: smaller;
 }
 /* Demo Section  */
 button {
-  background-color: linear-gradient(red, yellow); /* Green */
   border: 1px solid darkgray;
   border-radius: 5px;
   padding: auto;
@@ -73,6 +78,7 @@ button {
   text-decoration: none;
   display: inline-block;
   font-size: 16px;
+  box-shadow: 0px 8px 16px 0px rgba(0,0,0,0.2);
 }
 
 header {
@@ -102,7 +108,7 @@ header {
   border-radius: 5px;
   height:25vh;
   background-color: black;
-  color: yellow;
+  color: gold;
   display:flex;
   flex-direction: column;
   justify-content: flex-start;
@@ -119,11 +125,19 @@ header {
   justify-content: space-evenly;
 }
 
+.dropdown {
+  border: 1px solid darkgray;
+  border-radius: 5px;
+  padding: auto;
+  color: black;
+  padding: 15px 32px;
+  font-size: 16px;
+}
 /* Team Section */
 .team-container {
   margin-bottom: 50px;
   margin-top: 100px;
-  border-top: 2px solid gray;
+  border-top: 2px solid lightgray;
   display: grid;
   justify-items: center;
 }
@@ -140,6 +154,7 @@ header {
 .profile-pic {
   height: 25%;
   border-radius: 50%;
+  box-shadow: 0px 8px 16px 0px rgba(0,0,0,0.2);
 }
 
 .profile-name {
@@ -148,7 +163,6 @@ header {
 }
 
 .team {
-  margin: auto;
   display: grid;
   grid-template-columns: 1fr 1fr 1fr 1fr;
   justify-items: center;

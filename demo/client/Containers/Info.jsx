@@ -8,18 +8,18 @@ import npm from '../../images/npm-logo.png';
 export default function info() {
   return (
     <div className='info-container'>
-      <h2>About HacheQL</h2>
       <div className='info'>
-        <h3>HacheQL is a lightweight open source Javascript library that provides a solution of HTTP caching for GraphQL. Download our package and get started:</h3>
+        <h3>HacheQL is a lightweight, open source JavaScript library that provides an HTTP caching solution for GraphQL. Download our package and get started:</h3>
         <a href='https://www.npmjs.com/package/hacheql' target="_blank">
           <img className='npm-logo' src={npm}></img>
         </a>
-        <p>GraphQL provides an alternative to traditional RESTful architecture, emphasizing customization over optimization. This tradeoff highlights one of the prevalent shortcomings of GraphQL architecture, its nightmarish relationship with caching.</p>
+        <p>GraphQL provides an alternative to traditional RESTful architecture, emphasizing customization over optimization. This tradeoff highlights one of the prevalent shortcomings of GraphQL architecture: its rocky relationship with caching.</p>
         <div>
           <img className='graphql-rest-image' src={graphql_rest}></img>
           <cite>By Jordan Panasewicz, Medium.com</cite>
         </div>
-        <p>HacheQL reformats GraphQL queries and stores them as a hash in a data store, reducing the size of network transfer. Subsequent network responses are then cached over HTTP at client, server and proxy level.</p>
+        <p>HacheQL acts like a courier between your client and server. On the client, HacheQL takes a GraphQL request and sends it to the server in a way that makes the response HTTP cacheable. Subsequent requests from the client for the same data can be fulfilled from the browser or proxy caches. </p>
+
         <div className='hacheql-image-container'>
           <img className='hacheql-image' src={hacheql_image}></img>
         </div>
