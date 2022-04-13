@@ -1,46 +1,173 @@
+/**
+ * @module hacheQL/server
+ */
+
+/**
+* @param {Object} [options={}] - An object with settings.
+* @param {Object} [options.redis] - To use Redis for caching, give the object a property with the key redis and the value: <your Redis client>.
+* @param {Object} [cache={}] - An object to use as a cache. If not provided, defaults to an empty JavaScript object. If a Redis cache was specified, expressHacheQL uses that for caching.
+* @returns {function} - A function to be used as part of the middleware chain. After this piece of middleware runs, the GraphQL query can be accessed at req.body
+*/
+
+// Use a symbol to persist data that we will later need to access (wnen setting caching headers) so that users do not overwrite this data accidentally.
+const cacheable = Symbol('Cacheable');
+
+export function expressHacheQL({ redis } = {}, cache = {}) {
+  // This function has two modes: one if a Redis cache is used, and the other if not.
+  if (redis) {
+    return async function redisHandler(req, res, next) {
+      try {
+        if (req.method === 'GET') {
+          // Setting this value on res.locals tells the httpCache() function to set cache control headers on the response object.
+          res.locals[cacheable] = true;
+
+          // If a GET request was sent with HacheQL, the URL will have a 'hash' property in the query string.
+          // If the query string has no 'hash' property, simply call the next piece of middleware.
+          if (Object.hasOwn(req.query, 'hash')) {
+            // Try to retrieve a persisted query from the cache.
+            const query = await redis.get(req.query.hash);
+            if (!query) {
+              // Status code 303 asks the client to make a followup HTTP request with the query included.
+              return res.sendStatus(303);
+            }
+
+            delete req.query.hash; // After retrieving the persisted query we don't need the hash anymore.
+            req.method = 'POST'; // Change the request method POST to account for situations where subsequent middleware functions expect a POST method.
+            req.body = JSON.parse(query);
+          }
+          return next();
+        }
+        // If a POST request was sent with HacheQL, cache the query and its associated hash.
+        // If a POST request was not sent with HacheQL, simply call the next piece of middleware.
+        if (req.method === 'POST') {
+          // Check for a hash in the request.
+          if (Object.hasOwn(req.query, 'hash')) {
+            // if the hash is found, reformat the query to a string depending on its current data type and saving the hash along with its query string as a key-value pair in Redis cache
+            const query = typeof req.body === 'object' ? JSON.stringify(req.body) : req.body;
+            await redis.set(req.query.hash, query);
+          }
+        }
+        return next();
+      } catch (e) {
+        return next(e);
+      }
+    };
+  }
+  // If a Redis cache is not used, return a function depending on current request method.
+  return function cacheHandler(req, res, next) {
+    try {
+      // If the request was a GET, try to find the query string from cache object from the query hash
+      if (req.method === 'GET') {
+        res.locals[cacheable] = true;
+        if (Object.hasOwn(req.query, 'hash')) {
+          const query = cache[req.query.hash];
+          // If there is no persisted query found return 303 status and make another request as a POST
+          if (!query) {
+            return res.sendStatus(303);
+          }
+          delete req.query.hash;
+          req.method = 'POST';
+          req.body = query;
+        }
+        return next();
+      }
+      // if the hash is found, save the hash along with its query string as a key-value pair in cache object
+      if (req.method === 'POST') {
+        if (Object.hasOwn(req.query, 'hash')) {
+          cache[req.query.hash] = req.body;
+        }
+      }
+      return next();
+    } catch (e) {
+      return next(e);
+    }
+  };
+}
+
+/**
+ * @param {Object} req - A Node.js request object.
+ * @param {string} key - A string index of the property to remove from the URL search parameter string. In our case, 'hash'.
+ * @returns {Object} - An object containing the value of the property removed from the URL, along with the rest of the search params as a searchParams object (these remain in the URL).
+ */
+
+// This function gets the hashed GraphQL query from the request object's query string, then deletes that property from the query string.
+// If you're unfamiliar with the Node.js url module, see this section of the Node.js documentation:
+// https://nodejs.org/dist/latest-v16.x/docs/api/url.html#url-strings-and-url-objects
+
 function strip(req, key) {
   const url = new URL(req.url, `http://${req.headers.host}`);
   const { searchParams } = url;
   const hash = searchParams.get(key);
   url.searchParams.delete(key);
-  req.url = `${url.pathname}${url.search}`;
+  req.url = `${url.pathname}${url.search}${url.hash}`;
   return { searchParams, hash };
 }
 
-let tripwire = false;
+// Variable value tracks whether Redis connection has ever failed.
+let redisFailed = false;
 
-export async function nodeHacheQL(req, res, opts, cache = {}, callback = (err, data) => {
+/**
+ *
+ * @param {Object} req - request object
+ * @param {Object} res - response object
+ * @param {Object} [opts] - An object providing the settings, which defaults to empty object.
+ * @param {Object} [cache]  - An object to use as cache, which defaults to empty object.
+ * @param {function} [callback] - a callback which takes an error and/or data and is called when error/data is found.
+ * @returns {Promise} - A Promise which resolves with the value of whatever the callback returns, or rejects with the reason of whatever the callback throws.
+ * There are two ways access the data this function provides:
+ *    1. You can pass it a callback. The callback is passed two arguments, (error, data), where data is a GraphQL query document.
+ *    2. You can also use .then() chaining or async/await.
+ */
+
+function defaultCallback(err, data) {
   if (err) {
     throw err;
   }
   return data;
-}) {
-  const internalOpts = opts;
-  if (tripwire) {
-    delete internalOpts.redis;
+}
+
+// Once-ify setting up the error event listener on the Redis client. <-- This comment is bad. Will fix.
+let errorListenerIsSetUp = false;
+
+export async function nodeHacheQL(req, res, opts = {}, cache = {}, callback = defaultCallback) {
+  // Verify Redis connection has never failed, if truthy default to cache.
+  if (redisFailed) {
+    delete opts.redis;
   }
-  const { redis } = internalOpts;
+  const { redis } = opts;
+  // Deconstruct hash and search parameters from reconstructed URL.
   const { searchParams, hash } = strip(req, 'hash');
   try {
+    // If Redis Client object exists, use it as our cache.
     if (redis) {
-      // The .on() method is a method of Node.js's Event Emitter class.
-      redis.on('error', () => {
-        tripwire = true;
-        // Is this the only thing we want to happen if there's an error? How do we switch to the server memory?
-      });
+      if (!errorListenerIsSetUp) {
+        redis.on('error', () => {
+          redisFailed = true;
+        });
+        errorListenerIsSetUp = true;
+      }
       if (req.method === 'GET') {
+        if (!res.locals) {
+          res.locals = {};
+        }
+        // Setting this value on res.locals tells the httpCache() function to set cache control headers on the response object.
+        res.locals[cacheable] = true;
         if (hash) {
           const query = await redis.get(hash); // What happens if there's a Redis error? How do we switch over to the server memory?
           if (!query) {
-            res.statusCode = 800;
+            // Status code 303 asks the client to make a followup HTTP request with the query included.
+            res.statusCode = 303;
             res.send();
-            throw new URIError();
+            throw new URIError(); // Break
           }
-          return callback(undefined, JSON.parse(query));
+          return callback(null, JSON.parse(query));
         }
-        return callback(undefined, Object.fromEntries(searchParams.entries()));
+        // The searchParams.entries returns an iterator, which we then turn into a regular JS Object.
+        // https://developer.mozilla.org/en-US/docs/Web/API/URLSearchParams
+        return callback(null, Object.fromEntries(searchParams.entries()));
       }
       if (req.method === 'POST') {
+        // Construct the request body from the readable stream.
         const query = await (() => (
           new Promise((resolve) => {
             const buffers = [];
@@ -51,26 +178,36 @@ export async function nodeHacheQL(req, res, opts, cache = {}, callback = (err, d
               resolve(Buffer.concat(buffers).toString());
             });
           })))();
+
         if (hash) {
           await redis.set(hash, query);
         }
-        return callback(undefined, JSON.parse(query));
+        return callback(null, JSON.parse(query));
       }
       return callback();
     }
-    const internalCache = cache;
+    // If Redis Client does NOT exist...
     if (req.method === 'GET') {
-      if (hash) {
-        if (!internalCache[hash]) {
-          res.statusCode = 800;
-          res.send();
-          throw new URIError();
-        }
-        return callback(undefined, internalCache[hash]);
+      if (!res.locals) {
+        res.locals = {};
       }
-      return callback(undefined, Object.fromEntries(searchParams.entries()));
+      // Setting this value on res.locals tells the httpCache() function to set cache control headers on the response object.
+      res.locals[cacheable] = true;
+      if (hash) {
+        if (!cache[hash]) {
+          // Status code 303 asks the client to make a followup HTTP request with the query included.
+          res.statusCode = 303;
+          res.send();
+          throw new URIError(); // Break
+        }
+        return callback(null, cache[hash]);
+      }
+      // The searchParams.entries returns an iterator, which we then turn into a regular JS Object.
+      // https://developer.mozilla.org/en-US/docs/Web/API/URLSearchParams
+      return callback(null, Object.fromEntries(searchParams.entries()));
     }
     if (req.method === 'POST') {
+      // Construct the request body from the readable stream.
       const query = await (() => (
         new Promise((resolve) => {
           const buffers = [];
@@ -82,221 +219,32 @@ export async function nodeHacheQL(req, res, opts, cache = {}, callback = (err, d
           });
         })
       ))();
+
       if (hash) {
-        internalCache[hash] = query;
+        cache[hash] = query;
       }
-      return callback(undefined, JSON.parse(query)); // What if the query isn't JSON? What if they used content-type application/graphql?
+      return callback(null, JSON.parse(query));
     }
     return callback();
-  } catch (e) {
-    if (!(e instanceof URIError)) {
-      return callback(e); // Does this end up sending the 800 response back to the client? What if the user passed in their own callback function?
+  } catch (err) {
+    if (!(err instanceof URIError)) {
+      return callback(err);
     }
     return undefined;
   }
 }
 
-export function expressHacheQL({ redis }, cache = {}) {
-  if (redis) {
-    return async function redisHandler(req, res, next) {
-      try {
-        if (req.method === 'GET') {
-          if (Object.hasOwn(req.query, 'hash')) {
-            const query = await redis.get(req.query.hash);
-            if (!query) {
-              return res.sendStatus(800);
-            }
-            res.locals.cacheable = true;
-            req.query = {};
-            req.method = 'POST';
-            req.body = JSON.parse(query);
-          }
-          return next();
-        }
-        if (req.method === 'POST') {
-          if (Object.hasOwn(req.query, 'hash')) {
-            const query = typeof req.body === 'object' ? JSON.stringify(req.body) : req.body;
-            await redis.set(req.query.hash, query);
-          }
-        }
-        return next();
-      } catch (e) {
-        return next(e);
-      }
-    };
-  }
-  const internalCache = cache;
-  return function cacheHandler(req, res, next) {
-    try {
-      if (req.method === 'GET') {
-        if (Object.hasOwn(req.query, 'hash')) {
-          const query = internalCache[req.query.hash];
-          if (!query) {
-            return res.sendStatus(800);
-          }
-          res.locals.cacheable = true;
-          req.query = {};
-          req.method = 'POST';
-          req.body = query;
-        }
-        return next();
-      }
-      if (req.method === 'POST') {
-        if (Object.hasOwn(req.query, 'hash')) {
-          internalCache[req.query.hash] = req.body;
-        }
-      }
-      return next();
-    } catch (e) {
-      return next(e);
+export function httpCache(customHeaders) {
+  const defaultHeaders = {
+    'Cache-Control': 'max-age=5',
+  };
+
+  const finalHeaders = { ...defaultHeaders, ...customHeaders };
+
+  return function setHeaders(req, res, next) {
+    if (res.locals[cacheable]) {
+      res.set(finalHeaders);
     }
+    return next();
   };
 }
-
-export function httpCache(req, res, next) {
-  // expressHacheQL sets res.locals.cacheable to 'true' after successfully retrieving a persisted query from the cache.
-  if (res.locals.cacheable) {
-    res.set({
-      'Cache-Control': 'max-age=5',
-      // If we set E-tag here, it will never update
-      // Etag: req.query.hash
-    });
-  }
-  return next();
-}
-
-// async function redSwitch(req, res, client, key) {
-//  if (req.method === 'GET') {
-//    // If our method is GET, check if we've got a key
-//    if (key) {
-//      // If we do have a key, check for a corresponding query in our cache
-//      const cachedQuery = await client.get(key);
-//      if (!cachedQuery) {
-//        // If there is no corresponding query, set status to 800 and return undefined;
-//        res.statusCode = 800;
-//      // If we find a corresponding query, return it (as string);
-//      } else {
-//        return cachedQuery;
-//      }
-//    }
-//    // If no key, return undefined: we don't want to do anything special
-//  } else if (req.method === 'POST') {
-//    // Otherwise, if we have a post, first check for a body-parsed object
-//    if (req.body) {
-//      // If we have a req.body, check for a key in our search params
-//      if (!key) {
-//        /* if we have no key, we're dealing with a graphql post that hasn't
-//        * been formatted by our client-side. Return undefined.
-//        */
-//        return;
-//      // Otherise, if we have a key, set the cache and return undefined;
-//      }
-//      return client.set(key, JSON.stringify(req.body))
-//        .then(() => console.log('added to redis cache!'))
-//        .catch((e) => console.error(e));
-//    }
-//    /* if we don't have a req.body (without express, or without body-parser),
-//    * set up a listener to create one.
-//    */
-//    const buffers = [];
-//    req.on('data', (chunk) => {
-//      buffers.push(chunk);
-//    });
-//    // return the string representing our query
-//    return req.on('end', async () => {
-//      const data = Buffer.concat(buffers).toString();
-//      /* If there isn't a key, we can't add to our cache.
-//      * If there is, we must. Do whichever is appropriate.
-//      */
-//      if (!key) {
-//        return data;
-//      }
-//      return client.set(key, data)
-//        .then(() => data)
-//        .catch((e) => console.error(e));
-//    });
-//  }
-// }
-//
-// function memSwitch(req, res, key, cache) {
-//  if (req.method === 'GET') {
-//    // If our method is GET, check if we've got a key
-//    if (key) {
-//      // If we do have a key, check for a corresponding query in our cache
-//      const cachedQuery = cache[key];
-//      if (!cachedQuery) {
-//        // If there is no corresponding query, set status to 800 and return undefined;
-//        res.statusCode = 800;
-//      // If we find a corresponding query, return it (as string);
-//      } else {
-//        return cachedQuery;
-//      }
-//    }
-//    // If no key, return undefined: we don't want to do anything special
-//  } else if (req.method === 'POST') {
-//    // Otherwise, if we have a post, first check for a body-parsed object
-//    if (req.body) {
-//      // If we have a req.body, check for a key in our search params
-//      if (!key) {
-//        /* if we have no key, we're dealing with a graphql post that hasn't
-//        * been formatted by our client-side. Return undefined.
-//        */
-//        return;
-//      // Otherise, if we have a key, set the cache and return undefined;
-//      }
-//      cache[key] = req.body;
-//      return;
-//    }
-//    /* if we don't have a req.body (without express, or without body-parser),
-//    * set up a listener to create one.
-//    */
-//    const buffers = [];
-//    req.on('data', (chunk) => {
-//      buffers.push(chunk);
-//    });
-//    // return the string representing our query
-//    return req.on('end', async () => {
-//      const data = buffers.length ? JSON.parse(Buffer.concat(buffers).toString()) : undefined;
-//      /* If there isn't a key, we can't add to our cache.
-//      * If there is, we must. Do whichever is appropriate.
-//      */
-//      if (key) {
-//        cache[key] = data;
-//      }
-//      return data;
-//    });
-//  }
-// }
-//
-// export function nodeHacheQL(req, res, opts = {}) {
-//  const key = decode(req);
-//  if (opts.redis) {
-//    return redSwitch(req, res, opts.redis, key);
-//  }
-//  return memSwitch(req, res, key);
-// }
-//
-// export function expressHacheQL(opts = {}, cache = {}) {
-//  return function (req, res, next) {
-//    let result;
-//    if (opts.redis) {
-//      result = redSwitch(req, res, opts.redis, req.query.hash)
-//        .then((data) => {
-//          if (data) {
-//            return JSON.parse(data);
-//          }
-//        });
-//    } else {
-//      result = memSwitch(req, res, req.query.hash, cache);
-//    }
-//    if (res.statusCode === 800) {
-//      res.send();
-//      return;
-//    }
-//    if (result) {
-//      req.body = result;
-//    }
-//    return next();
-//  };
-// }
-//

@@ -4,8 +4,7 @@
   "type": "module",
   "description": "A minimal client/server to interact with a GraphQL API",
   "main": "server/server.js",
-  "scripts": {
-  },
+  "scripts": {},
   "author": "",
   "license": "MIT",
   "dependencies": {
