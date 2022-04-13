@@ -1,6 +1,6 @@
 ![](demo/images/Logo.png)
 
-# Welcome to [HacheQL](https://wwww.hacheql.com/) &middot; [![License badge](https://img.shields.io/badge/license-MIT-informational)](LICENSE) [![npm badge](https://img.shields.io/badge/npm-v1.0.0-informational)]() [![PRs Welcome](https://img.shields.io/badge/PRs-welcome-brightgreen)]()
+# Welcome to [HacheQL](http://www.hacheql.org/) &middot; [![License badge](https://img.shields.io/badge/license-MIT-informational)](LICENSE) [![npm badge](https://img.shields.io/badge/npm-v1.0.0-informational)]() [![PRs Welcome](https://img.shields.io/badge/PRs-welcome-brightgreen)]()
 HacheQL is a JavaScript library that brings HTTP caching to your GraphQL API.
 
 ## Features
@@ -9,7 +9,7 @@ HacheQL is a JavaScript library that brings HTTP caching to your GraphQL API.
 - Includes specialized support for servers written with Express.js.
 - Supports caching with Redis or in the server's local memory.
 
-Check out [our demo site](https://www.hacheql.com/) to see what HacheQL can do.
+Check out [our demo site](http://www.hacheql.org/) to see what HacheQL can do.
 
 <hr>
 
