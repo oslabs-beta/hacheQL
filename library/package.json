@@ -1,6 +1,6 @@
 {
   "name": "hacheql",
-  "version": "0.0.8",
+  "version": "0.0.9",
   "description": "A library for HTTP caching with GraphQL",
   "main": "hacheql.js",
   "exports": {
