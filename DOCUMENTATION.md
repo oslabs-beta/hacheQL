@@ -2,15 +2,15 @@
 
 ## Overview
 
-HacheQL works by hashing the contents of GraphQL queries and caching key-value pairs of the form \<hashed query>: \<full query> on the server side. (Hence the name HacheQL -- 'hash' + 'cache' = 'hache.')
+HacheQL works by hashing the contents of GraphQL queries and caching key-value pairs of the form \<hashed query>: \<full query> on the server side.
 
-No matter how large or complex the original query is, the hashed version is short enough to be sent as a query parameter in a URL, while still being uniquely identifiable as related to the original query. As a result, HacheQL can effectively send any GraphQL query as a GET request, which allows browsers and proxy servers to cache the response.
+No matter how large or complex the original query is, the hashed version is short enough to be sent as a query parameter in a URL, while still being uniquely identifiable as related to the original query. As a result, HacheQL can send any GraphQL query as a GET request, which allows browsers and proxy servers to cache the response.
 
 Refer to the sections below for detailed information about specific HacheQL functions.
 
 ## hacheQL()
 
-Sends a GraphQL request over HTTP such that the response is HTTP cacheable.
+Send a GraphQL request such that the response is HTTP cacheable.
 
 <details><summary>Expand for details</summary>
 
@@ -55,7 +55,7 @@ Using `.then` chaining:
     })
     .then((response) => response.json())
     .then((data) => console.log(data))
-    .catch((error) => { throw error });
+    .catch((error) => /* error handling logic */);
 ```
 
 Using `async/await`:
@@ -71,11 +71,11 @@ Using `async/await`:
       console.log(data);
 
     } catch (error) {
-      throw error;
+      /* error handling logic */
     }
 ```
 
-The previous examples sent the GraphQL query as a string (as indicated by the `application/graphql` Content-Type header), but it's more standard to send a query as a JSON-encoded object (using the `application/json` Content-Type header).
+The previous examples sent the GraphQL query as a string (as indicated by the `application/graphql` Content-Type header), but it's also common to send a query as a JSON-encoded object (using the `application/json` Content-Type header).
 
 HacheQL is perfectly happy to handle that kind of request too.
 
@@ -99,7 +99,7 @@ Using `.then` chaining:
     })
     .then((response) => response.json())
     .then((data) => console.log(data))
-    .catch((error) => { throw error });
+    .catch((error) => /* error handling logic */);
 ```
 
 Using `async/await`:
@@ -126,7 +126,7 @@ Using `async/await`:
       console.log(data);
 
     } catch (error) {
-      throw error;
+      /* error handling logic */
     }
 ```
 
@@ -137,20 +137,20 @@ Using `async/await`:
 
 ## nodeHacheQL()
 
-Processes incoming GraphQL requests on the server.  
+Process incoming GraphQL requests on the server.  
 > Note: If your project uses Express.js, we recommend using [expressHacheQL](#expresshacheql) instead.
 
 <details><summary>Expand for details</summary>
 
 ### Behavior in detail
 
-Like many functions in Node.js, nodeHacheQL() runs asynchronously. It parses the Request object's readable stream and either caches the the incoming GraphQL query (if it's a new query) or retrieves the correct GraphQL query from the cache. It returns a Promise which, upon resolving, passes the query to a provided callback function.
+Like many functions in Node.js, nodeHacheQL() runs asynchronously. It parses the Request object's readable data stream and either caches the incoming GraphQL query (if it's a new query) or retrieves the correct GraphQL query from the cache.
 
  <hr>
 
 ### Syntax
 ```javascript
-nodeHacheQL(req, res, opts[, cache, callback(error, query)])
+nodeHacheQL(req, res[, opts, cache, callback])
 ```
 
 ### Parameters
@@ -160,18 +160,18 @@ nodeHacheQL(req, res, opts[, cache, callback(error, query)])
   - The HTTP Response object.
 - `opts` \<Object> *(optional)*
   - Determines where GraphQL queries should be cached.
-  - If not specified, nodeHacheQL caches GraphQL queries in the server's memory. 
+  - If not provided, nodeHacheQL caches GraphQL queries in the server's memory. 
   - To cache with Redis, provide a reference to your Redis client as a property with the key `redis.`  
 
     ```javascript
     nodeHacheQL(req, res, { redis: <redisClient> })
     ```
 - `cache` \<Object> *(optional)*
-  - If not specified, defaults to an empty object. *DO WE ACTUALLY NEED THIS AS A PARAMETER?*
+  - If not provided, defaults to an empty object.
 - `callback` \<function> *(optional)*
-  - If not specified, defaults to:
+  - If not provided, defaults to:
   ```javascript
-  (err, data) => {
+  (err, query) => {
     if (err) {
       throw err;
     }
@@ -180,27 +180,43 @@ nodeHacheQL(req, res, opts[, cache, callback(error, query)])
   ```
 
 ### Return value
-\<Object> &middot; A Promise which, upon resolving, invokes the provided callback function.
+\<Promise> &middot;  A Promise which resolves with the value of whatever the callback returns, or rejects with the reason of whatever the callback throws.
 
-- nodeHacheQL passes two arguments to the callback function.
-  - The first argument is `null` unless an error has occurred. In the case of an error, the first argument is the error object.
-  - The second argument is a GraphQL query.
-    > Note: The data type of the query depends on how it was formatted when it was originally sent from the client. If it was formatted as a string, the retrieved query will be a string. If it was a JSON-encoded object, the retrieved query will be a JavaScript object (nodeHacheQL does the JSON parsing for you).
+There are two ways define what happens after this function finishes running:
+  1. You can pass it a callback. The callback is passed two arguments, (error, data), where data is a GraphQL query document.
+  2. You can also use .then() chaining or async/await.
 
 <hr>
 
 ### Sample usage 
 
-*IS THIS RIGHT?*
-
+Using async/await: 
 ```javascript
 server.on('request', async (req, res) => {
   if (request.url === '/graphql') {
-    const query = await nodeHacheQL(req, res, { redis: redisClient }); 
-    const data = await database.query(query);
-    res.end(data);
+    try {
+      const query = await nodeHacheQL(req, res, { redis: redisClient }); 
+      const data = await database.query(query);
+      res.end(data);
+    } catch (error) {
+      /* error handling logic */
+    }
   }
 });
+```
+
+Using a callback: 
+```javascript
+server.on('request', async (req, res) => {
+  if (request.url === '/graphql') {
+    nodeHacheQL(req, res, { redis: redisClient }, (err, query) => {
+      database.query(query)
+        .then((data) => res.end(data))
+        .catch((error) => /* error handling logic */);
+    }); 
+  }
+});
+
 ```
 
 </details>
@@ -209,13 +225,13 @@ server.on('request', async (req, res) => {
 
 ## expressHacheQL()
 
-Processes incoming GraphQL requests on the server.   
-This function is similar to [nodeHacheQL()](#nodehacheql), but it's built specifically for Express.js and takes advantage of Express's middleware pattern.
+Process incoming GraphQL requests on the server.   
+> This function is similar to [nodeHacheQL()](#nodehacheql), but it's built specifically for Express.js and takes advantage of Express's middleware pattern.
 
 <details><summary>Expand for details</summary> 
 
 ### Behavior in detail
-Invoking expressHacheQL returns a function to be used as part of the middleware chain. The function caches new GraphQL queries and retrieves cached queries when they are needed. After this piece of middleware runs, the GraphQL query can be accessed at `req.body`.
+Invoking expressHacheQL returns a function to be used as part of the middleware chain. The middleware function caches new GraphQL queries and retrieves cached queries when they are needed. After the middleware function runs, the GraphQL query can be accessed at `req.body`.
 
 <hr>
 
@@ -226,16 +242,16 @@ expressHacheQL([options, customCache])
 
 ### Parameters  
 - `options` \<Object> *(optional)*
-  - An object with settings. If not provided, expressHacheQL uses the server's memory for caching.
-  - There is currently only one setting available (the `redis` setting), but more may be added in the future.
+  - An object with settings. If not provided, defaults to an empty Object.
+  - Currently, there is only one setting available (see the next bullet), but more may be added in the future.
   - To use Redis for caching, give the object a property with the key `redis`.
     - `redis`: \<your Redis client>
 - `customCache` \<Object> *(optional)*
-  - An object to use as a cache. If not provided, defaults to an empty JavaScript object.
-  - If a Redis cache was specified, expressHacheQL uses that for caching.
+  - An object to use as a cache. If not provided, defaults to an empty Object.
+  - If a Redis cache was provided in the `options` object, that overrides anything passed in as the `customCache` argument.
   
 ### Return value
-\<function>
+\<function> &middot; 
 A function to be used as part of the middleware chain. After this piece of middleware runs, the GraphQL query can be accessed at `req.body`.
 
 <hr>
@@ -268,13 +284,13 @@ app.use('/graphql', expressHacheQL({}, <customCacheObject>), /* other middleware
 
 ## httpCache()
 
-Sets cache-control headers on the HTTP Response object.
+Set cache-control headers on the HTTP Response object.
 
 <details><summary>Expand for details</summary>
 
 ### Behavior in detail
 
-httpCache() sets HTTP caching headers only if the value of `res.locals.cacheable` is `true`. expressHacheQL() sets `res.locals.cacheable` to `true` after successfully retrieving a persisted query from the cache, so in general there shouldn't be a problem. If httpCache() appears to be malfunctioning, however, checking the value of `res.locals.cacheable` might be a good place to start debugging.
+httpCache() automatically sets the header `'Cache-Control': 'max-age=5'` on all cacheable responses. However, you can define custom behavior if you'd like.
 
 <hr>
 
@@ -282,20 +298,20 @@ httpCache() sets HTTP caching headers only if the value of `res.locals.cacheable
 > Note: Express automatically passes all three of these arguments to each piece of middleware. You do not need to pass them to httpCache() manually.
 
 ```javascript
-httpCache([req, res, next])
+httpCache(customHeadersObject)
 ```
 
 ### Parameters
 
-- `req` \<Object>
-  - The HTTP Request object.
-- `res` \<Object>
-  - The HTTP Response object.
-- `next` \<Object>
-  - The next middleware function.
+- `customHeadersObject` \<Object>
+  - An object that defines HTTP response headers to set. If not provided, defaults to: 
+  ```javascript
+  { 'Cache-Control': 'max-age=5' }
+  ```
+  - Common caching-related HTTP response headers include the [Cache-Control](https://developer.mozilla.org/en-US/docs/Web/HTTP/Headers/Cache-Control) header and the [Etag](https://developer.mozilla.org/en-US/docs/Web/HTTP/Headers/ETag) header.
 
 ### Return value
-An invocation of the next middleware function (i.e., this function returns `next()`).
+A function to be used as part of the middlware chain. The middleware function sets HTTP headers on all cacheable response objects.
 
 <hr>
 
@@ -304,11 +320,13 @@ An invocation of the next middleware function (i.e., this function returns `next
 ```javascript
 app.use(
   '/graphql',
-  expressHacheQL({ redis: <redisClient> }),
-  httpCache,
+  expressHacheQL(),
+  httpCache({
+    'Cache-Control': 'max-age=10, must-revalidate';
+  })
   graphqlHTTP({
     schema,
-    graphiql: true,
+    graphiql: false,
   })
 );
 ```
