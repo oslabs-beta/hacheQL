@@ -3,8 +3,8 @@ import path, { dirname } from 'path';
 import { fileURLToPath } from 'url';
 import process from 'process';
 import { graphqlHTTP } from 'express-graphql';
-import schema from './graphql/types';
 import { expressHacheQL, httpCache } from 'hacheql/server';
+import schema from './graphql/types';
 
 const PORT = 3000;
 
@@ -22,7 +22,7 @@ app.use(express.static(path.resolve(folderPath, '../build')));
 app.use(
   '/graphql',
   expressHacheQL({}),
-  httpCache({'Cache-Control': 'no-cache'}),
+  httpCache(),
   graphqlHTTP({
     schema,
     graphiql: true,
@@ -39,7 +39,7 @@ app.use((err, req, res, next) => {
     status: 500,
     message: { err: 'An error occurred!' },
   };
-  const errorObj = Object.assign({}, defaultErr, err);
+  const errorObj = { ...defaultErr, ...err };
   return res.status(errorObj.status).json(errorObj.message);
 });
 
