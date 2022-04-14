@@ -2,15 +2,15 @@
  * @module hacheQL/server
  */
 
-/** 
-* @param {Object} [options={}] - An object with settings. 
+/**
+* @param {Object} [options={}] - An object with settings.
 * @param {Object} [options.redis] - To use Redis for caching, give the object a property with the key redis and the value: <your Redis client>.
 * @param {Object} [cache={}] - An object to use as a cache. If not provided, defaults to an empty JavaScript object. If a Redis cache was specified, expressHacheQL uses that for caching.
 * @returns {function} - A function to be used as part of the middleware chain. After this piece of middleware runs, the GraphQL query can be accessed at req.body
 */
 
 // Use a symbol to persist data that we will later need to access (wnen setting caching headers) so that users do not overwrite this data accidentally.
-const cacheable = Symbol('Cacheable')
+const cacheable = Symbol('Cacheable');
 
 export function expressHacheQL({ redis } = {}, cache = {}) {
   // This function has two modes: one if a Redis cache is used, and the other if not.
@@ -19,18 +19,18 @@ export function expressHacheQL({ redis } = {}, cache = {}) {
       try {
         if (req.method === 'GET') {
           // Setting this value on res.locals tells the httpCache() function to set cache control headers on the response object.
-          res.locals[cacheable] = true; 
-          
+          res.locals[cacheable] = true;
+
           // If a GET request was sent with HacheQL, the URL will have a 'hash' property in the query string.
           // If the query string has no 'hash' property, simply call the next piece of middleware.
           if (Object.hasOwn(req.query, 'hash')) {
             // Try to retrieve a persisted query from the cache.
             const query = await redis.get(req.query.hash);
-            if (!query) { 
+            if (!query) {
               // Status code 303 asks the client to make a followup HTTP request with the query included.
               return res.sendStatus(303);
             }
-            
+
             delete req.query.hash; // After retrieving the persisted query we don't need the hash anymore.
             req.method = 'POST'; // Change the request method POST to account for situations where subsequent middleware functions expect a POST method.
             req.body = JSON.parse(query);
@@ -63,7 +63,7 @@ export function expressHacheQL({ redis } = {}, cache = {}) {
           const query = cache[req.query.hash];
           // If there is no persisted query found return 303 status and make another request as a POST
           if (!query) {
-            return res.sendStatus(303); 
+            return res.sendStatus(303);
           }
           delete req.query.hash;
           req.method = 'POST';
@@ -107,7 +107,7 @@ function strip(req, key) {
 let redisFailed = false;
 
 /**
- * 
+ *
  * @param {Object} req - request object
  * @param {Object} res - response object
  * @param {Object} [opts] - An object providing the settings, which defaults to empty object.
@@ -147,13 +147,8 @@ export async function nodeHacheQL(req, res, opts = {}, cache = {}, callback = de
         errorListenerIsSetUp = true;
       }
       if (req.method === 'GET') {
-        if (!res.locals) {
-          res.locals = {};
-        }
-        // Setting this value on res.locals tells the httpCache() function to set cache control headers on the response object.
-        res.locals[cacheable] = true;
         if (hash) {
-          const query = await redis.get(hash);
+          const query = await redis.get(hash); // What happens if there's a Redis error? How do we switch over to the server memory?
           if (!query) {
             // Status code 303 asks the client to make a followup HTTP request with the query included.
             res.statusCode = 303;
@@ -164,12 +159,12 @@ export async function nodeHacheQL(req, res, opts = {}, cache = {}, callback = de
         }
         // The searchParams.entries returns an iterator, which we then turn into a regular JS Object.
         // https://developer.mozilla.org/en-US/docs/Web/API/URLSearchParams
-        return callback(null, Object.fromEntries(searchParams.entries())); 
+        return callback(null, Object.fromEntries(searchParams.entries()));
       }
       if (req.method === 'POST') {
         // Construct the request body from the readable stream.
         const query = await (() => (
-          new Promise((resolve) => { 
+          new Promise((resolve) => {
             const buffers = [];
             req.on('data', (chunk) => {
               buffers.push(chunk);
@@ -188,11 +183,6 @@ export async function nodeHacheQL(req, res, opts = {}, cache = {}, callback = de
     }
     // If Redis Client does NOT exist...
     if (req.method === 'GET') {
-      if (!res.locals) {
-        res.locals = {};
-      }
-      // Setting this value on res.locals tells the httpCache() function to set cache control headers on the response object.
-      res.locals[cacheable] = true;
       if (hash) {
         if (!cache[hash]) {
           // Status code 303 asks the client to make a followup HTTP request with the query included.
@@ -204,7 +194,7 @@ export async function nodeHacheQL(req, res, opts = {}, cache = {}, callback = de
       }
       // The searchParams.entries returns an iterator, which we then turn into a regular JS Object.
       // https://developer.mozilla.org/en-US/docs/Web/API/URLSearchParams
-      return callback(null, Object.fromEntries(searchParams.entries())); 
+      return callback(null, Object.fromEntries(searchParams.entries()));
     }
     if (req.method === 'POST') {
       // Construct the request body from the readable stream.
@@ -234,7 +224,6 @@ export async function nodeHacheQL(req, res, opts = {}, cache = {}, callback = de
   }
 }
 
-
 export function httpCache(customHeaders) {
   const defaultHeaders = {
     'Cache-Control': 'max-age=5',
@@ -247,6 +236,5 @@ export function httpCache(customHeaders) {
       res.set(finalHeaders);
     }
     return next();
-  }
+  };
 }
-
