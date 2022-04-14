@@ -21,7 +21,7 @@ app.use(express.static(path.resolve(folderPath, '../build')));
 // graphiql req
 app.use(
   '/graphql',
-  expressHacheQL(),
+  expressHacheQL({}),
   httpCache({'Cache-Control': 'no-cache'}),
   graphqlHTTP({
     schema,
