@@ -64,7 +64,7 @@ That's all for the server! See [Client-side HacheQL](README.md#client-side-hache
 
 <hr>
 
-### Server-side HacheQL - with Express
+## Server-side HacheQL - with Express
 If your project uses Express, this section is for you. If not, see the previous section, titled 'Server-side HacheQL.'
 
 <details><summary>Expand for instructions</summary>
@@ -105,6 +105,11 @@ app.use(
   httpCache(),
   graphqlHTTP({ schema, graphiql: true,}),
 );
+```
+
+5. `expressHacheQL` relies on Express's built-in [express.json()](https://expressjs.com/en/api.html#express.json) method for parsing JSON-encoded request bodies. If you don't have it set up yet, add the following toward the top of your main server file:
+```javascript
+app.use(express.json())
 ```
 
 That's all for the server! Let's set up the client.

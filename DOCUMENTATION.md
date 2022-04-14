@@ -233,6 +233,11 @@ Process incoming GraphQL requests on the server.
 ### Behavior in detail
 Invoking expressHacheQL returns a function to be used as part of the middleware chain. The middleware function caches new GraphQL queries and retrieves cached queries when they are needed. After the middleware function runs, the GraphQL query can be accessed at `req.body`.
 
+> Note: `expressHacheQL` relies on Express's built-in [express.json()](https://expressjs.com/en/api.html#express.json) method for parsing JSON-encoded request bodies. If you don't have it set up yet, add the following toward the top of your main server file:
+```javascript
+app.use(express.json())
+```
+
 <hr>
 
 ### Syntax
