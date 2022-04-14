@@ -147,11 +147,6 @@ export async function nodeHacheQL(req, res, opts = {}, cache = {}, callback = de
         errorListenerIsSetUp = true;
       }
       if (req.method === 'GET') {
-        if (!res.locals) {
-          res.locals = {};
-        }
-        // Setting this value on res.locals tells the httpCache() function to set cache control headers on the response object.
-        res.locals[cacheable] = true;
         if (hash) {
           const query = await redis.get(hash); // What happens if there's a Redis error? How do we switch over to the server memory?
           if (!query) {
@@ -188,11 +183,6 @@ export async function nodeHacheQL(req, res, opts = {}, cache = {}, callback = de
     }
     // If Redis Client does NOT exist...
     if (req.method === 'GET') {
-      if (!res.locals) {
-        res.locals = {};
-      }
-      // Setting this value on res.locals tells the httpCache() function to set cache control headers on the response object.
-      res.locals[cacheable] = true;
       if (hash) {
         if (!cache[hash]) {
           // Status code 303 asks the client to make a followup HTTP request with the query included.
