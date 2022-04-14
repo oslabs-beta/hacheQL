@@ -25,8 +25,8 @@ import {
 * https://developer.mozilla.org/en-US/docs/Web/API/fetch#parameters
 
 * @param {string} endpoint - The endpoint for the GraphQL requests. Analogous to the fetch API's 'resource' parameter.
-* @param {object} options - An object containing settings for the request; for example, the HTTP request method, headers, and request body. Analogous to the fetch API's 'init' parameter. All valid settings for the fetch API's 'init' object are valid for this function's options object.
-* @returns {promise} - A promise that resolves to a response object from the server, or rejects with an error object.
+* @param {object} options - An object containing settings for the request; for example, the HTTP request method, headers, and request body. Analogous to the fetch API's 'init' parameter. All valid properties for the fetch API's 'init' object are valid properties for this function's options object.
+* @returns {promise} - A Promise that resolves to a Response object from the server, or rejects with an Error object.
 */
 
 // TESTS =======================================================
