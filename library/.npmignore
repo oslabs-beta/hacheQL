@@ -1,3 +1,5 @@
 # .npmignore
+coverage
 node_modules
 tests
+.eslintrc.cjs
