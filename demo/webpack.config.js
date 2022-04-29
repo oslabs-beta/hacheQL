@@ -15,7 +15,10 @@ const config = {
     path: path.resolve(folderPath, 'build'),
     clean: true,
   },
-  plugins: [new HtmlWebpackPlugin({ template: './client/index.html' })],
+  plugins: [new HtmlWebpackPlugin({
+    template: './client/index.html',
+    favicon: 'favicon.svg',
+  })],
   devtool: 'eval-source-map',
   module: {
     rules: [
