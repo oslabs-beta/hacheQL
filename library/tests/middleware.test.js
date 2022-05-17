@@ -1,6 +1,11 @@
-import { describe, expect, jest, test } from '@jest/globals';
+import {
+  describe, expect, jest, test,
+} from '@jest/globals';
 import httpMocks from 'node-mocks-http';
 import { expressHacheQL, nodeHacheQL } from '../hacheql-server';
+import httpCodes from './HTTPStatusCodes';
+
+const HASH_NOT_FOUND = httpCodes.hashNotFound;
 
 // Function signature;
 // checkHash(request, response, next)
@@ -57,10 +62,10 @@ describe('expressHacheQL - server-side function', () => {
   });
 
   describe('GET', () => {
-    it('Should send an 800 response and prevent the execution of any subsequent pieces of middleware if the requested hash is not present in the server\'s cache', async () => {
+    it(`Should send a ${HASH_NOT_FOUND} response and prevent the execution of any subsequent pieces of middleware if the requested hash is not present in the server's cache`, async () => {
       const configuredMiddleware = expressHacheQL({}, cache);
       configuredMiddleware(req, res, next);
-      expect(res.statusCode).toBe(800);
+      expect(res.statusCode).toBe(HASH_NOT_FOUND);
       expect(next).toBeCalledTimes(0);
     });
 
@@ -151,7 +156,7 @@ describe('expressHacheQL - server-side function', () => {
       expect(next).toBeCalledTimes(2);
     });
 
-    it.skip('If there\'s an error in the Redis cache, it should error 800 and switch to the local cache.', async () => {
+    it.skip(`If there's an error in the Redis cache, it should error ${HASH_NOT_FOUND} and switch to the local cache.`, async () => {
       // This will simulate the Redis client being down.
       const fakeRedisClient = {
         get: jest.fn(() => Promise.reject(new Error('Error occurred while accessing the Redis cache.'))),
@@ -162,8 +167,8 @@ describe('expressHacheQL - server-side function', () => {
       // Simulate our function running as part of a middleware chain.
       await configuredMiddleware(req, res, next);
 
-      // Expect to receive and 800 error here.
-      expect(res.statusCode).toBe(800);
+      // Expect to receive a HASH_NOT_FOUND error here.
+      expect(res.statusCode).toBe(HASH_NOT_FOUND);
 
       // Then send a followup post.
       const followupRequest = httpMocks.createRequest(mockReqFollowupPOST);
@@ -179,28 +184,28 @@ describe('expressHacheQL - server-side function', () => {
       }));
     });
 
-    xit('If the redis cache ever errors, ALL subsequent caching should take place in the local memory (potentially update redis cache when back online)', () => {});
+    it.skip('If the redis cache ever errors, ALL subsequent caching should take place in the local memory (potentially update redis cache when back online)', () => {});
   });
 
-  xdescribe('POST', () => {
+  describe.skip('POST', () => {
     it('For a POST request, if there is a hash, it should add the hash and request body to the server\'s cache and invoke the next piece of middleware', () => {});
     it('If there is no hash, it should invoke the next piece of middleware without storing anything in the cache.', () => {});
 
     it('If there was ever an error reading or writing from the redis cache, the request should instead be stored in the local cache', () => {});
     it('If the redis cache is erroring for the first time, switch to the local cache for the memory-life', () => {});
   });
-  xdescribe('other HTTP methods', () => {
+  describe.skip('other HTTP methods', () => {
     it('If anything other than a POST or GET is found, we should invoke next (should we also log an error?)', () => {});
   });
 });
 
-xdescribe('nodeHacheQL - server-side function', () => {
+describe.skip('nodeHacheQL - server-side function', () => {
   describe('Cache characteristics', () => {
     test('The cache should be a FIFO heap, with the most recently accessed item moving to the top. It should be configurable to a certain size.', () => {});
   });
   describe('GET', () => {
     describe('Caching lifecycle', () => {
-      test('Should send an 800 response if the requested hash is not present in the server\'s cache', () => {});
+      test(`Should send an ${HASH_NOT_FOUND} response if the requested hash is not present in the server's cache`, () => {});
     });
     test(`For a GET request, if the requested hash is present in the cache:
         If on finishing the execution of our function the request method is a:
@@ -208,7 +213,7 @@ xdescribe('nodeHacheQL - server-side function', () => {
           GET: The associated query should be stored as req.query`, () => {});
     describe('Edge cases', () => {
       test('Should pass the request along to the next piece of middleware if there isn\'t a hash on the search params', () => {});
-      test('If there\'s an error in the redis cache, it should error 800 and switch to the local cache.', () => {});
+      test(`If there's an error in the redis cache, it should error ${HASH_NOT_FOUND} and switch to the local cache.`, () => {});
       test('If the redis cache ever errors, ALL subsequent caching should take place in the local memory (potentially update redis cache when back online)', () => {});
     });
   });
