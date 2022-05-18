@@ -3,9 +3,7 @@ import {
 } from '@jest/globals';
 import httpMocks from 'node-mocks-http';
 import { expressHacheQL, nodeHacheQL } from '../hacheql-server';
-import httpCodes from './HTTPStatusCodes';
-
-const HASH_NOT_FOUND = httpCodes.hashNotFound;
+import { HASH_NOT_FOUND } from './HTTPStatusCodes';
 
 // Function signature;
 // checkHash(request, response, next)
