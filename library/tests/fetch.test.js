@@ -7,7 +7,7 @@ import {
   requestOptions,
   serverResponse200,
   serverResponse304,
-} from './mockReqRes.test';
+} from './mockReqRes';
 import {
   getFetchRequestProfile,
   mockServer_HashNotFound,
@@ -15,11 +15,13 @@ import {
   mockServer_NotModified,
   mockErrorGET,
   mockErrorPOST,
-} from './mockFunctions.test';
+} from './mockFunctions';
+
+import { HASH_NOT_FOUND } from './HTTPStatusCodes';
 
 /**
 * Function signature
-* hacheQL(endpoint, options) // IS THE OPTIONS OBJECT OPTIONAL?
+* hacheQL(endpoint, options)
 
 * This function signature is designed to mimic the fetch API. (In fact, the function uses the fetch API under the hood.)
 * https://developer.mozilla.org/en-US/docs/Web/API/fetch#parameters
@@ -72,7 +74,7 @@ describe('hacheQL() - client-side wrapper for fetch()', () => {
       expect(Object.hasOwn(hacheQLFetchRequestProfile, 'body')).toBe(false);
     });
 
-    test('If it receives 800, followup request options should be identical to the passed in request options', async () => {
+    test(`If it receives ${HASH_NOT_FOUND}, followup request options should be identical to the passed in request options`, async () => {
       global.fetch = mockServer_HashNotFound;
       await hacheQL(endpointURL, { ...requestOptions, method: 'DELETE' });
       expect(mockServer_HashNotFound.mock.calls.length).toBe(2);
@@ -85,7 +87,7 @@ describe('hacheQL() - client-side wrapper for fetch()', () => {
       jest.clearAllMocks();
     });
 
-    test('Should make a followup request if the initial GET request receives an 800 response.', async () => {
+    test(`Should make a followup request if the initial GET request receives a ${HASH_NOT_FOUND} response.`, async () => {
       expect.assertions(2);
       global.fetch = mockServer_HashNotFound;
       const response = await hacheQL(endpointURL, requestOptions);

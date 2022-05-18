@@ -1,3 +1,5 @@
+import { HASH_NOT_FOUND } from './HTTPStatusCodes';
+
 const endpointURL = 'graphql';
 const requestOptions = {
   method: 'POST',
@@ -68,8 +70,8 @@ const serverResponse200 = {
 const serverResponse304 = {
   status: 304,
 };
-const serverResponse800 = {
-  status: 800,
+const serverResponseHashNotFound = {
+  status: HASH_NOT_FOUND,
 };
 
 export {
@@ -77,5 +79,5 @@ export {
   requestOptions,
   serverResponse200,
   serverResponse304,
-  serverResponse800,
+  serverResponseHashNotFound,
 };
