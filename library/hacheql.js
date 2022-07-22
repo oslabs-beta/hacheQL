@@ -17,7 +17,7 @@ function hacheQL(endpoint, options) {
   // If the body is undefined then the request pass through as is
   if (!options.body) {
     return fetch(endpoint, options);
-  };
+  }
   // Check if operation type is uncacheable, if so pass through as is
   const { query } = JSON.parse(options.body);
   const operationType = query.split('{')[0].trim();
@@ -34,7 +34,7 @@ function hacheQL(endpoint, options) {
     fetch(`${endpoint}/?hash=${HASH}`, newOpts)
       .then((data) => {
         // Status 303 indicates that hash is not found in server cache
-        // Upon receipt, send original request as follow-up 
+        // Upon receipt, send original request as follow-up
         if (data.status === 303) {
           fetch(`${endpoint}/?hash=${HASH}`, options)
             .then((res) => resolve(res))
@@ -44,7 +44,6 @@ function hacheQL(endpoint, options) {
         }
       })
       .catch((err) => {
-        console.log(err);
         reject(err);
       });
   });
