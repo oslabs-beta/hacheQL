@@ -9,9 +9,7 @@
 * @returns {function} - A function to be used as part of the middleware chain. After this piece of middleware runs, the GraphQL query can be accessed at req.body
 */
 
-// Use a symbol to persist data that we will later need to access (wnen setting caching headers) so that users do not overwrite this data accidentally.
-const cacheable = Symbol('Cacheable');
-
+// Use Object.defineProperty() to persist data that we will later need to access (wnen setting caching headers) so that users do not overwrite this data accidentally.
 export function expressHacheQL({ redis } = {}, cache = {}) {
   // This function has two modes: one if a Redis cache is used, and the other if not.
   if (redis) {
@@ -19,7 +17,12 @@ export function expressHacheQL({ redis } = {}, cache = {}) {
       try {
         if (req.method === 'GET') {
           // Setting this value on res.locals tells the httpCache() function to set cache control headers on the response object.
-          res.locals[cacheable] = true;
+          Object.defineProperty(res.locals, 'cacheable', {
+            enumerable: false,
+            writable: false,
+            configurable: false,
+            value: true,
+          });
 
           // If a GET request was sent with HacheQL, the URL will have a 'hash' property in the query string.
           // If the query string has no 'hash' property, simply call the next piece of middleware.
@@ -58,7 +61,12 @@ export function expressHacheQL({ redis } = {}, cache = {}) {
     try {
       // If the request was a GET, try to find the query string from cache object from the query hash
       if (req.method === 'GET') {
-        res.locals[cacheable] = true;
+        Object.defineProperty(res.locals, 'cacheable', {
+          enumerable: false,
+          writable: false,
+          configurable: false,
+          value: true,
+        });
         if (Object.hasOwn(req.query, 'hash')) {
           const query = cache[req.query.hash];
           // If there is no persisted query found return 303 status and make another request as a POST
@@ -232,7 +240,7 @@ export function httpCache(customHeaders) {
   const finalHeaders = { ...defaultHeaders, ...customHeaders };
 
   return function setHeaders(req, res, next) {
-    if (res.locals[cacheable]) {
+    if (Object.hasOwn(res.locals, 'cacheable')) {
       res.set(finalHeaders);
     }
     return next();

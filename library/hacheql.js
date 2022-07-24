@@ -9,19 +9,20 @@ const uncacheable = { mutation: true, subscription: true };
 /**
 * @param {string} endpoint - the string representing the endpoint the client would like to query.
 * @param {Object} options - options object corresponding to the fetch API specification.
-* @returns {Promise} - promise that resolves to the value returned either from the cache or the server, or terminates in an error, unless the error is that the server does not recognize our query param,
+* @returns {Promise} - promise that resolves to the value returned either from the cache or the server,
+* or terminates in an error, unless the error is that the server does not recognize our query param,
 * in which case the promise does not resolve until a second fetch is sent and returned.
 */
 
 function hacheQL(endpoint, options) {
-  // If the body is undefined then the request pass through as is
-  if (!options.body) {
+  // If the body is undefined then let the request pass through as is
+  if (!Object.hasOwn(options, 'body')) {
     return fetch(endpoint, options);
   }
   // Check if operation type is uncacheable, if so pass through as is
   const { query } = JSON.parse(options.body);
   const operationType = query.split('{')[0].trim();
-  if (uncacheable[operationType]) {
+  if (Object.hasOwn(uncacheable, operationType)) {
     return fetch(endpoint, options);
   }
   // Reconstruct request as a GET request to make response HTTP cacheable
