@@ -9,7 +9,6 @@
 * @returns {function} - A function to be used as part of the middleware chain. After this piece of middleware runs, the GraphQL query can be accessed at req.body
 */
 
-// Use Object.defineProperty() to persist data that we will later need to access (wnen setting caching headers) so that users do not overwrite this data accidentally.
 export function expressHacheQL({ redis } = {}, cache = {}) {
   // This function has two modes: one if a Redis cache is used, and the other if not.
   if (redis) {
